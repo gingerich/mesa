@@ -1,0 +1,17 @@
+{
+  "name": "@mesa/util",
+  "version": "0.0.0",
+  "description": "Collection of useful utilities",
+  "main": "./lib/index.js",
+  "repository": "https://github.com/gingerich/mesa/packages/mesa-util",
+  "author": "Marlin Gingerich <marlin@gingerich.io>",
+  "license": "MIT",
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "npm run clean && babel src -d lib",
+    "clean": "rm -rf ./lib",
+    "lint": "eslint src --fix",
+    "test": "jest",
+    "test-cov": "npm run test -- --coverage"
+  }
+}

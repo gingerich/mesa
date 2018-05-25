@@ -1,0 +1,25 @@
+{
+  "name": "@mesa/component",
+  "version": "0.0.0",
+  "description": "A functional component model",
+  "main": "./lib/index.js",
+  "repository": "https://github.com/gingerich/mesa/packages/mesa-component",
+  "author": "Marlin Gingerich <marlin@gingerich.io>",
+  "license": "MIT",
+  "dependencies": {
+    "@mesa/util": "^0.0.0",
+    "debug": "^3.1.0",
+    "invariant": "^2.2.3",
+    "koa-compose": "^4.0.0",
+    "lodash.get": "^4.4.2",
+    "purposejs": "^5.0.0"
+  },
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "npm run clean && babel src -d lib",
+    "clean": "rm -rf lib",
+    "lint": "eslint src --fix",
+    "test": "jest",
+    "test-cov": "npm run test -- --coverage"
+  }
+}
