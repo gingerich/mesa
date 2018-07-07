@@ -7,9 +7,9 @@ exports.default = exports.Namespace = void 0;
 
 var _util = require("@mesa/util");
 
-var _Handler = _interopRequireDefault(require("./Handler"));
-
 var _Router = _interopRequireDefault(require("./Router"));
+
+var _Handler = _interopRequireDefault(require("./Handler"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -31,15 +31,13 @@ function defineHandler(registry, pattern, handler) {
 class Namespace {
   constructor(options) {
     this.options = options;
-    this.registry = (0, _util.matchbox)({
-      nested: options.nested
-    });
+    this.registry = (0, _util.matchbox)(options.match);
   }
 
   action(pattern, component) {
     const handler = _Handler.default.spec().use(component);
 
-    defineHandler(this.registry, pattern, component);
+    defineHandler(this.registry, pattern, handler);
     return this;
   }
 
@@ -65,7 +63,7 @@ class Namespace {
 
     return _Router.default.spec(_objectSpread({
       match
-    }, options));
+    }, this.options.router, options));
   }
 
 }

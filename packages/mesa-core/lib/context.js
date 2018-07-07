@@ -6,9 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.createContext = createContext;
 exports.default = void 0;
 
-var _Component = _interopRequireDefault(require("./Component"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _component = require("@mesa/component");
 
 function createContext(defaultValue) {
   const context = {
@@ -46,9 +44,9 @@ function createContext(defaultValue) {
 
   };
 
-  class Provider extends _Component.default {
-    compose(substream) {
-      const middleware = substream();
+  class Provider extends _component.Component {
+    compose(stack) {
+      const middleware = stack();
       return async (msg, next) => {
         const oldValue = context.currentValue;
         context.currentValue = this.config.value; // const result = await next(msg)
@@ -61,7 +59,7 @@ function createContext(defaultValue) {
 
   }
 
-  class Consumer extends _Component.default {
+  class Consumer extends _component.Component {
     compose() {
       return this.config.subcomponents(context.currentValue);
     }

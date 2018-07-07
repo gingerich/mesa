@@ -5,28 +5,26 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = exports.Router = void 0;
 
-var _Component = _interopRequireDefault(require("./Component"));
+var _component = require("@mesa/component");
 
 var _Stack = _interopRequireDefault(require("./common/Stack"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-class Router extends _Component.default {
+class Router extends _component.Component {
   static destructure(key) {
     return Router.spec({
       destructure: key
     });
   }
 
-  compose({
-    compose
-  }) {
-    return (msg, next) => {
+  compose(stack) {
+    return (ctx, next) => {
       // Lookup handlers for msg
-      const match = this.config.match(msg); // No handlers to accept msg
+      const match = this.config.match(ctx.msg); // No handlers to accept msg
 
       if (!match) {
-        return next(msg);
+        return next(ctx);
       }
 
       const {
@@ -36,17 +34,17 @@ class Router extends _Component.default {
 
       const {
         [destructure]: payload
-      } = msg;
+      } = ctx.msg;
 
       if (payload) {
-        msg = payload;
+        ctx.msg = payload;
       }
 
       const balancer = balanceComponent.use(match.node.handlers);
-      const handler = compose([balancer]); // Don't pass next at the namespace level
-
-      return handler(msg); // const handler = compose(match.node.handlers)
-      // return handler(msg)
+      const handler = stack.compose([balancer]);
+      return handler(ctx, ({
+        msg
+      }) => msg);
     };
   }
 

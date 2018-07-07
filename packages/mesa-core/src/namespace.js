@@ -1,6 +1,6 @@
 import { matchbox } from '@mesa/util'
-import Handler from './Handler'
 import Router from './Router'
+import Handler from './Handler';
 
 function defineHandler (registry, pattern, handler) {
   const node = registry.define(pattern)
@@ -17,13 +17,13 @@ function defineHandler (registry, pattern, handler) {
 export class Namespace {
   constructor (options) {
     this.options = options
-    this.registry = matchbox({ nested: options.nested })
+    this.registry = matchbox(options.match)
   }
 
   action (pattern, component) {
     const handler = Handler.spec().use(component)
 
-    defineHandler(this.registry, pattern, component)
+    defineHandler(this.registry, pattern, handler)
 
     return this
   }
@@ -48,7 +48,7 @@ export class Namespace {
 
   router (options) {
     const match = msg => this.match(msg)
-    return Router.spec({ match, ...options })
+    return Router.spec({ match, ...this.options.router, ...options })
   }
 }
 

@@ -1,11 +1,11 @@
 import { Component } from '@mesa/component'
 
 export class Stack extends Component {
-  compose ({ compose }) {
+  compose (stack) {
     const { reverse, subcomponents } = this.config
     const middleware = reverse ? [...subcomponents].reverse() : subcomponents
 
-    return compose(middleware)
+    return stack.compose(middleware)
   }
 }
 

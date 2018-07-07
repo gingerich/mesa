@@ -1,4 +1,4 @@
-import Component from './Component'
+import { Component } from '@mesa/component'
 
 export function createContext (defaultValue) {
   const context = {
@@ -41,8 +41,8 @@ export function createContext (defaultValue) {
   *   .use(Consumer.spec({ subcomponents: value => () => value }))
   */
   class Provider extends Component {
-    compose (substream) {
-      const middleware = substream()
+    compose (stack) {
+      const middleware = stack()
 
       return async (msg, next) => {
         const oldValue = context.currentValue

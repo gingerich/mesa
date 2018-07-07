@@ -14,8 +14,8 @@ class Condition extends _component.Component {
     });
   }
 
-  compose(substream) {
-    const middleware = substream();
+  compose(stack) {
+    const middleware = stack();
     const {
       condition: cond,
       negative

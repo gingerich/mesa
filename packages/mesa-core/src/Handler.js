@@ -1,9 +1,16 @@
-import { Component, compose } from '@mesa/component'
-import Stack from './common/Stack'
+import { Component } from '@mesa/component'
 
 export class Handler extends Component {
-  compose (substream) {
-    return compose(substream(), this.context)
+  compose (stack) {
+    const middleware = stack()
+
+    return async (ctx, next) => {
+      const originalDefer = ctx.defer
+      ctx.defer = next.bind(ctx)
+      const result = await middleware(ctx, next)
+      ctx.defer = originalDefer
+      return result
+    }
   }
 }
 

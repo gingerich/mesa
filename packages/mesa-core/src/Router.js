@@ -1,4 +1,4 @@
-import Component from './Component'
+import { Component } from '@mesa/component'
 import Stack from './common/Stack'
 
 export class Router extends Component {
@@ -7,32 +7,28 @@ export class Router extends Component {
     return Router.spec({ destructure: key })
   }
 
-  compose ({ compose }) {
-    return (msg, next) => {
+  compose (stack) {
+    return (ctx, next) => {
       // Lookup handlers for msg
-      const match = this.config.match(msg)
+      const match = this.config.match(ctx.msg)
 
       // No handlers to accept msg
       if (!match) {
-        return next(msg)
+        return next(ctx)
       }
 
       const { destructure, balanceComponent = Stack.spec() } = this.config
 
       // Optionally destructure msg
-      const { [destructure]: payload } = msg
+      const { [destructure]: payload } = ctx.msg
       if (payload) {
-        msg = payload
+        ctx.msg = payload
       }
 
       const balancer = balanceComponent.use(match.node.handlers)
-      const handler = compose([balancer])
+      const handler = stack.compose([balancer])
 
-      // Don't pass next at the namespace level
-      return handler(msg)
-
-      // const handler = compose(match.node.handlers)
-      // return handler(msg)
+      return handler(ctx, ({ msg }) => msg)
     }
   }
 }

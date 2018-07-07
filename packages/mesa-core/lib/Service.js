@@ -15,26 +15,36 @@ var _Container = _interopRequireDefault(require("./Container"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// import Namespace from './Namespace'
+const context = {
+  call(...args) {
+    return this.service.call(...args);
+  },
+
+  defer() {
+    return this.msg;
+  }
+
+};
+
 class Service extends _eventemitter.default {
   constructor(namespace, options) {
     super('service');
-    this.id = (0, _v.default)(); // this.namespace = Namespace.spec()
-
+    this.id = (0, _v.default)();
     this.options = options;
     this.namespace = namespace;
     this.container = _Container.default.spec({
       service: this
     });
+    this.context = Object.create(context);
   }
   /*
-  * Extendability methods on, use, plugin
+  * Extendability methods
   */
 
 
   use(component) {
     if (component instanceof Service) {
-      component = component.spec();
+      component = component.getSpec();
     }
 
     this.container.use(component);
@@ -46,18 +56,8 @@ class Service extends _eventemitter.default {
     return this;
   }
   /*
-  * Service methods ns, accept, call
+  * Service methods
   */
-  // ns (namespace) {
-  //   const ns = new Namespace()
-  //   const router = Router.spec({ match: msg => ns.match(msg) })
-  //   this.namespace.accept(namespace, router)
-  //   return ns
-  // }
-  // accept (pattern, component) {
-  //   this.namespace.accept(pattern, component)
-  //   return this
-  // }
 
 
   ns(namespace, options) {
@@ -69,26 +69,45 @@ class Service extends _eventemitter.default {
     return this;
   }
 
-  call(msg) {
+  call(msg, ...parts) {
     if (!this.handler) {
       this.handler = this.compose();
-    } // Unhandled messages should return null
+    }
+
+    if (parts.length) {
+      msg = [msg, ...parts];
+    }
+
+    const ctx = this.createContext(msg); // Unhandled messages should return null
+
+    return this.handler(ctx, () => null);
+  }
+
+  createContext(msg) {
+    const context = Object.create(this.context);
+    context.service = this;
+    context.msg = msg;
+    return context;
+  }
+  /*
+  * Utility methods
+  */
 
 
-    return this.handler(msg, () => null);
+  createContext(msg) {
+    const context = Object.create(this.context);
+    context.service = this;
+    context.msg = msg;
+    return context;
+  }
+
+  getSpec() {
+    return this.container;
   }
 
   start(...args) {
     this.emit('start', ...args);
     return this;
-  }
-  /*
-  * Utility methods compose, listen
-  */
-
-
-  spec() {
-    return this.container;
   }
 
   compose() {

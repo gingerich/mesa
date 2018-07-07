@@ -5,8 +5,8 @@ export class Condition extends Component {
     return Condition.spec({ condition })
   }
 
-  compose (substream) {
-    const middleware = substream()
+  compose (stack) {
+    const middleware = stack()
     const { condition: cond, negative } = this.config
 
     const checkCondition = ctx =>

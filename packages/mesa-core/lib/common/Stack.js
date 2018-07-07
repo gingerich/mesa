@@ -8,15 +8,13 @@ exports.default = exports.Stack = void 0;
 var _component = require("@mesa/component");
 
 class Stack extends _component.Component {
-  compose({
-    compose
-  }) {
+  compose(stack) {
     const {
       reverse,
       subcomponents
     } = this.config;
     const middleware = reverse ? [...subcomponents].reverse() : subcomponents;
-    return compose(middleware);
+    return stack.compose(middleware);
   }
 
 }
