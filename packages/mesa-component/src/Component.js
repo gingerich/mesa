@@ -16,6 +16,20 @@ export class Component {
     return new Specification(factory, config)
   }
 
+  static of (source) {
+    if (source instanceof this) {
+      return source
+    } else if (typeof source === 'function') {
+      return class extends this {
+        compose () {
+          return source(this.config, this.context)
+        }
+      }
+    } else {
+      throw new Error(`Cannot componentize unexpected type ${typeof source}`)
+    }
+  }
+
   static functional (fn) {
     return class extends this {
       compose () {

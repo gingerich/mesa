@@ -15,8 +15,20 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 // import Mount from '../components/Mount'
 const debug = require('debug')('mesa:spec');
 
+function defineSubcomponents(config) {
+  const {
+    subcomponents = []
+  } = config;
+  Object.defineProperty(config, 'subcomponents', {
+    value: subcomponents,
+    writable: true
+  });
+}
+
 class Spec {
-  static of(type, config, ...subcomponents) {
+  static of(type, config
+  /*, ...subcomponents*/
+  ) {
     return new this(type, config, subcomponents);
   }
 
@@ -29,12 +41,17 @@ class Spec {
     return typeFactory(_objectSpread({}, config), context);
   }
 
-  constructor(type, config = {}, subcomponents = []) {
-    this.type = type; // this.config = config
-
-    this.config = _objectSpread({
-      subcomponents
-    }, config); // this.subcomponents = subcomponents.slice(0)
+  constructor(type, config = {}
+  /*, subcomponents = []*/
+  ) {
+    this.type = type;
+    this.config = _objectSpread({}, config);
+    this.config.subcomponents = []; // defineSubcomponents(this.config)
+    // this.config = {
+    //   subcomponents: [],
+    //   ...config
+    // }
+    // this.subcomponents = subcomponents.slice(0)
   }
 
   set(key, value) {

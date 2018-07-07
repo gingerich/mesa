@@ -55,11 +55,11 @@ function compose(root, context) {
         } // Compose this components subcomponents
 
 
-        function substream() {
+        function stack() {
           return composeSubcomponents(component.config.subcomponents);
         }
 
-        substream.compose = composeSubcomponents; // // Build a function that performs composition on the subcomponents
+        stack.compose = composeSubcomponents; // // Build a function that performs composition on the subcomponents
         // function middleware (subcomponents) {
         //   // return innerCompose(subcomponents, component.getChildContext(), component)
         //   return purpose(subcomponents.map(s => innerCompose(s, component.getChildContext(), component)))
@@ -86,7 +86,7 @@ function compose(root, context) {
         * Reduce the result to its functional composition by making a recursive call
         */
 
-        const fn = innerCompose(component.compose(substream), context); // Trigger component lifecycle hook
+        const fn = innerCompose(component.compose(stack), context); // Trigger component lifecycle hook
         // component.componentDidMount(parent)
         // Ensure function contains reference to the spec that produced it
 

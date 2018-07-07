@@ -48,11 +48,11 @@ export function compose (root, context) {
         }
 
         // Compose this components subcomponents
-        function substream () {
+        function stack () {
           return composeSubcomponents(component.config.subcomponents)
         }
 
-        substream.compose = composeSubcomponents
+        stack.compose = composeSubcomponents
 
         // // Build a function that performs composition on the subcomponents
         // function middleware (subcomponents) {
@@ -86,7 +86,7 @@ export function compose (root, context) {
         * The component can optionally call the subcomponents function to produce a function representing its subcomponents
         * Reduce the result to its functional composition by making a recursive call
         */
-        const fn = innerCompose(component.compose(substream), context)
+        const fn = innerCompose(component.compose(stack), context)
 
         // Trigger component lifecycle hook
         // component.componentDidMount(parent)

@@ -1,22 +1,7 @@
-// import compose from 'koa-compose'
-
-// import Component from '../components/Component'
-// import Except from '../components/Except'
-// import Mount from '../components/Mount'
-
 const debug = require('debug')('mesa:spec')
 
-function defineSubcomponents ({ subcomponents = [], ...config }) {
-  Object.defineProperty(config, 'subcomponents', {
-    value: subcomponents,
-    writable: true
-  })
-
-  return config
-}
-
 export class Spec {
-  static of (type, config/*, ...subcomponents*/) {
+  static of (type, config) {
     return new this(type, config, subcomponents)
   }
 
@@ -28,17 +13,10 @@ export class Spec {
     return typeFactory({ ...config }, context)
   }
 
-  constructor (type, config = {}/*, subcomponents = []*/) {
+  constructor (type, config = {}) {
     this.type = type
-    // this.config = config
-    this.config = defineSubcomponents(config)
-
-    // this.config = {
-    //   subcomponents: [],
-    //   ...config
-    // }
-
-    // this.subcomponents = subcomponents.slice(0)
+    this.config = { ...config }
+    this.config.subcomponents = this.config.subcomponents || []
   }
 
   set (key, value) {
