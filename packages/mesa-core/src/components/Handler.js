@@ -13,5 +13,3 @@ export class Handler extends Component {
     }
   }
 }
-
-export default Handler

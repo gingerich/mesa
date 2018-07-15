@@ -8,5 +8,3 @@ export class Stack extends Component {
     return stack.compose(middleware)
   }
 }
-
-export default Stack

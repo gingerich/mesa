@@ -1,5 +1,5 @@
 import { Component } from '@mesa/component'
-import Stack from './common/Stack'
+import { Stack } from './common'
 
 export class Router extends Component {
 
@@ -32,5 +32,3 @@ export class Router extends Component {
     }
   }
 }
-
-export default Router

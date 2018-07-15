@@ -1,6 +1,5 @@
 import { matchbox } from '@mesa/util'
-import Router from './Router'
-import Handler from './Handler';
+import { Handler, Router } from '../components'
 
 function defineHandler (registry, pattern, handler) {
   const node = registry.define(pattern)

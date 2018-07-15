@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3'
 import uuidv1 from 'uuid/v1'
 import { compose } from '@mesa/component'
-import Container from './Container'
+import { Container } from '../components'
 
 const context = {
   call(...args) {
