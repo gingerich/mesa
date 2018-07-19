@@ -1,5 +1,4 @@
 import { Server } from './Server'
-import { client } from '../../mesa-http/src'
 import { Client } from './Client'
 
 export * from './Client'
