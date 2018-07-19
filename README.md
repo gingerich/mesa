@@ -9,9 +9,10 @@ class Greetings extends Mesa.Component {
   }
 }
 
-Mesa.createService()
+const greetingService = Mesa.createService()
   .action({ cmd: 'greet' }, Greetings.spec({ greeting: 'Hello' }))
-  .call({ cmd: 'greet', name: 'World' })
+  
+greetingService.call({ cmd: 'greet', name: 'World' })
   .then(res => console.log(res))
   
 // 'Hello World!'
@@ -24,9 +25,7 @@ const transports = Transport.createLayer()
 
 const transportPlugin = transports.makePlugin()
 
-Mesa.createService()
-  .plugin(transportPlugin())
-  .action({ cmd: 'greet' }, Greetings.spec({ greeting: 'Hello' }))
+greetingService.plugin(transportPlugin())
   
 transportPlugin.start(({ tcp }) => {
   tcp.listen(3000)
