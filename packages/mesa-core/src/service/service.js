@@ -13,8 +13,7 @@ const context = {
 }
 
 export class Service extends EventEmitter {
-
-  constructor (namespace, options) {
+  constructor(namespace, options) {
     super('service')
     this.id = uuidv1()
     this.options = options
@@ -27,7 +26,7 @@ export class Service extends EventEmitter {
   * Extendability methods
   */
 
-  use (component) {
+  use(component) {
     if (component instanceof Service) {
       component = component.getSpec()
     }
@@ -36,8 +35,11 @@ export class Service extends EventEmitter {
     return this
   }
 
-  plugin (plug) {
-    plug(this)
+  plugin(plug, cb) {
+    const result = plug(this)
+    if (cb) {
+      cb(result)
+    }
     return this
   }
 
@@ -45,16 +47,16 @@ export class Service extends EventEmitter {
   * Service methods
   */
 
-  ns (namespace, options) {
+  ns(namespace, options) {
     return this.namespace.ns(namespace, options)
   }
 
-  action (pattern, component) {
+  action(pattern, component) {
     this.namespace.action(pattern, component)
     return this
   }
 
-  call (msg, ...parts) {
+  call(msg, ...parts) {
     if (!this.handler) {
       this.handler = this.compose()
     }
@@ -87,19 +89,21 @@ export class Service extends EventEmitter {
     return context
   }
 
-  getSpec () {
+  getSpec() {
     return this.container
   }
 
-  start (...args) {
+  start(...args) {
     this.emit('start', ...args)
     return this
   }
 
-  compose () {
-    return compose(this.container, this) // IDEA: create context object to pass
+  compose() {
+    return compose(
+      this.container,
+      this
+    ) // IDEA: create context object to pass
   }
-
 }
 
 export default Service
