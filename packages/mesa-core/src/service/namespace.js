@@ -1,17 +1,7 @@
 import { matchbox } from '@mesa/util'
 import { Handler, Router } from '../components'
 
-function defineHandler(registry, pattern, handler) {
-  const node = registry.define(pattern)
-
-  if (!node.handlers) {
-    node.handlers = []
-  }
-
-  node.handlers.unshift(handler)
-
-  return node
-}
+export default options => new Namespace(options)
 
 export class Namespace {
   constructor(options) {
@@ -52,4 +42,14 @@ export class Namespace {
   }
 }
 
-export default options => new Namespace(options)
+function defineHandler(registry, pattern, handler) {
+  const node = registry.define(pattern)
+
+  if (!node.handlers) {
+    node.handlers = []
+  }
+
+  node.handlers.unshift(handler)
+
+  return node
+}
