@@ -6,9 +6,7 @@ export default class Transport {
   }
 
   use(protocol, init) {
-    if (typeof init !== 'function') {
-      throw new Error('Expected a function')
-    }
+    invariant(typeof init === 'function', 'Expected a function')
 
     this.protocols[protocol] = { init }
     return this
