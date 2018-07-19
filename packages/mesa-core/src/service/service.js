@@ -71,13 +71,6 @@ export class Service extends EventEmitter {
     return this.handler(ctx, () => null)
   }
 
-  createContext(msg) {
-    const context = Object.create(this.context)
-    context.service = this
-    context.msg = msg
-    return context
-  }
-
   /*
   * Utility methods
   */
