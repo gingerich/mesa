@@ -43,18 +43,18 @@ const matchEvery = matchResults => matchResults.every(isMatching => isMatching)
 
 const matchAny = matchResults => matchResults.some(isMatching => isMatching)
 
-function matching (matches = [], options = {}) {
+function matching(matches = [], options = {}) {
   // return data =>
   //   matches.some(match =>
   //     Object.keys(match).every(key => matcher(data[key], match[key])))
 
   const { matcher = defaultMatcher } = options
 
-  return (data) => {
-
-    const evaluateToArray = (match) =>
-      typeof match === 'function' ?
-        [match(data)] : Object.keys(match).map(key => matcher(match[key], data[key]))
+  return data => {
+    const evaluateToArray = match =>
+      typeof match === 'function'
+        ? [match(data)]
+        : Object.keys(match).map(key => matcher(match[key], data[key]))
 
     const matchObject = match =>
       Promise.all(evaluateToArray(match)).then(matchEvery)

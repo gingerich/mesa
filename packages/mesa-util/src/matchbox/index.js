@@ -1,52 +1,54 @@
 import matchFactory from './match'
 
-function getOrderedEntries (obj) {
-  return Object.keys(obj).sort().reduce((entries, key) => {
-    entries.push([key, obj[key]])
-    return entries
-  }, [])
+function getOrderedEntries(obj) {
+  return Object.keys(obj)
+    .sort()
+    .reduce((entries, key) => {
+      entries.push([key, obj[key]])
+      return entries
+    }, [])
 }
 
 class Node {
-  constructor (value) {
+  constructor(value) {
     this.value = value
   }
 }
 
 class Matchbox {
-  constructor (options) {
+  constructor(options) {
     this.options = options
     this.nodes = new Map()
   }
 
-  define (pattern) {
+  define(pattern) {
     const ordered = getOrderedEntries({ ...pattern })
     // const key = ordered.join('')
     const key = JSON.stringify(ordered)
-    
+
     if (!this.nodes.has(key)) {
       const node = new Node(ordered, pattern)
       this.nodes.set(key, node)
     }
-    
+
     return this.nodes.get(key)
   }
 
-  get (pattern) {
+  get(pattern) {
     const ordered = getOrderedEntries(pattern)
     const key = ordered.join('')
 
     return this.nodes.get(key)
   }
 
-  remove (pattern) {
+  remove(pattern) {
     const ordered = getOrderedEntries(pattern)
     const key = ordered.join('')
 
     return this.nodes.delete(key)
   }
 
-  match (input, strict) {
+  match(input, strict) {
     const ordered = getOrderedEntries({ ...input })
     const patterns = [...this.nodes.values()]
 
@@ -63,9 +65,9 @@ class Matchbox {
   }
 }
 
-export function matchbox (opts = {}) {
+export function matchbox(opts = {}) {
   const match = matchFactory({
-    matchValues (patternVal, inputVal, strict) {
+    matchValues(patternVal, inputVal, strict) {
       if (typeof patternVal === 'function') {
         return patternVal(inputVal)
       }

@@ -1,4 +1,4 @@
-function Extension (...args) {
+function Extension(...args) {
   if (!(this instanceof Extension)) {
     return new Extension(...args)
   }
@@ -8,7 +8,7 @@ function Extension (...args) {
   }
 }
 
-Extension.prototype.plugin = function (name, plug) {
+Extension.prototype.plugin = function(name, plug) {
   if (name instanceof Extension) {
     name.extend(this.plugins)
     return this
@@ -22,7 +22,7 @@ Extension.prototype.plugin = function (name, plug) {
     ext = name
   } else {
     ext = {
-      [name] () {
+      [name]() {
         if (typeof plug === 'string') {
           return this[plug].apply(this, arguments)
         }
@@ -34,7 +34,7 @@ Extension.prototype.plugin = function (name, plug) {
   return this
 }
 
-Extension.prototype.extend = function (target) {
+Extension.prototype.extend = function(target) {
   const extension = new Extension()
   // if (typeof target === 'function' && target.prototype) {
   //   Object.assign(target.prototype, this.plugins)

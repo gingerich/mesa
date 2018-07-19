@@ -1,17 +1,14 @@
 {
-  "name": "@mesa/component",
+  "name": "@mesa/transport",
   "version": "0.0.0",
-  "description": "A functional component model",
+  "description": "Message transport layer for services",
   "main": "./lib/index.js",
-  "repository": "https://github.com/gingerich/mesa/packages/mesa-component",
+  "repository": "https://github.com/gingerich/mesa/packages/mesa-transport",
   "author": "Marlin Gingerich <marlin@gingerich.io>",
   "license": "MIT",
   "dependencies": {
-    "@mesa/util": "^0.0.0",
     "debug": "^3.1.0",
-    "invariant": "^2.2.3",
-    "lodash.get": "^4.4.2",
-    "purposejs": "^6.0.0"
+    "invariant": "^2.2.3"
   },
   "scripts": {
     "prepublishOnly": "npm run build",

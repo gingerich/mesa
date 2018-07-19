@@ -1,17 +1,16 @@
 {
-  "name": "@mesa/component",
+  "name": "@mesa/tcp",
   "version": "0.0.0",
-  "description": "A functional component model",
+  "description": "TCP transporter for Mesa",
   "main": "./lib/index.js",
-  "repository": "https://github.com/gingerich/mesa/packages/mesa-component",
+  "repository": "https://github.com/gingerich/mesa/packages/mesa-tcp",
   "author": "Marlin Gingerich <marlin@gingerich.io>",
   "license": "MIT",
   "dependencies": {
-    "@mesa/util": "^0.0.0",
+    "@mesa/component": "^0.0.0",
+    "@mesa/core": "^0.0.0",
     "debug": "^3.1.0",
-    "invariant": "^2.2.3",
-    "lodash.get": "^4.4.2",
-    "purposejs": "^6.0.0"
+    "invariant": "^2.2.3"
   },
   "scripts": {
     "prepublishOnly": "npm run build",

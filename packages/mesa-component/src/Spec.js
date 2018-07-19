@@ -1,26 +1,11 @@
-// import compose from 'koa-compose'
-
-// import Component from '../components/Component'
-// import Except from '../components/Except'
-// import Mount from '../components/Mount'
-
 const debug = require('debug')('mesa:spec')
 
-function defineSubcomponents ({ subcomponents = [], ...config }) {
-  Object.defineProperty(config, 'subcomponents', {
-    value: subcomponents,
-    writable: true
-  })
-
-  return config
-}
-
 export class Spec {
-  static of (type, config/*, ...subcomponents*/) {
+  static of(type, config) {
     return new this(type, config, subcomponents)
   }
 
-  static make (spec, context) {
+  static make(spec, context) {
     const { type, config } = spec
 
     const typeFactory = makeTypeFactory(type)
@@ -28,20 +13,13 @@ export class Spec {
     return typeFactory({ ...config }, context)
   }
 
-  constructor (type, config = {}/*, subcomponents = []*/) {
+  constructor(type, config = {}) {
     this.type = type
-    // this.config = config
-    this.config = defineSubcomponents(config)
-
-    // this.config = {
-    //   subcomponents: [],
-    //   ...config
-    // }
-
-    // this.subcomponents = subcomponents.slice(0)
+    this.config = { ...config }
+    this.config.subcomponents = this.config.subcomponents || []
   }
 
-  set (key, value) {
+  set(key, value) {
     if (typeof key === 'object') {
       Object.assign(this.config, key)
     } else {
@@ -50,7 +28,7 @@ export class Spec {
     return this
   }
 
-  use (...components) {
+  use(...components) {
     if (Array.isArray(components[0])) {
       components = components[0]
     }
@@ -59,13 +37,13 @@ export class Spec {
     return this
   }
 
-  subcomponents (value) {
+  subcomponents(value) {
     this.config.subcomponents = value
     return this
   }
 
-  ref (fn) {
-    function refDecorator (instance) {
+  ref(fn) {
+    function refDecorator(instance) {
       fn(instance)
       return instance
     }
@@ -86,10 +64,11 @@ export class Spec {
   // }
 }
 
-function makeTypeFactory (Type) {
+function makeTypeFactory(Type) {
   return (...args) =>
-    Object.prototype.hasOwnProperty.call(Type, 'prototype') ?
-      new Type(...args) : Type(...args)
+    Object.prototype.hasOwnProperty.call(Type, 'prototype')
+      ? new Type(...args)
+      : Type(...args)
 }
 
 export default Spec

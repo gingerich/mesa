@@ -5,7 +5,7 @@ import Component from './Component'
 * Reduces a spec to its functional representation
 * Returns a middleware function composition representative of the given spec
 */
-export function compose (spec, context, parent) {
+export function compose(spec, context, parent) {
   // We already have a function so just return it
   if (typeof spec === 'function') {
     return spec
@@ -22,12 +22,18 @@ export function compose (spec, context, parent) {
   // context = component.getChildContext()
 
   // Build a function that performs composition on the subcomponents
-  const middleware = (function middleware () {
-    return this.config.subcomponents.map(s => compose(s, this.getChildContext(), this))
-  }.bind(component))
+  const middleware = function middleware() {
+    return this.config.subcomponents.map(s =>
+      compose(
+        s,
+        this.getChildContext(),
+        this
+      )
+    )
+  }.bind(component)
 
   // Convenience method calls koa-compose on the result of subcomponent composition
-  middleware.compose = function () {
+  middleware.compose = function() {
     return koaCompose(middleware())
   }
 
@@ -39,7 +45,11 @@ export function compose (spec, context, parent) {
   * The component can optionally call the middleware function to produce a function representing its subcomponents
   * Reduce the result to its functional composition by making a recursive call
   */
-  const fn = compose(component.compose(middleware), context, component)
+  const fn = compose(
+    component.compose(middleware),
+    context,
+    component
+  )
 
   // Trigger component lifecycle hook
   component.componentDidMount(parent)

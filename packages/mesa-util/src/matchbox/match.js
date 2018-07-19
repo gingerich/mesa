@@ -1,10 +1,8 @@
 const matchFactory = (opts = {}) => (patterns, ordered, strict = false) => {
   let pointers = new Array(patterns.length).fill(0)
-  
+
   for (const [key, value] of ordered) {
-
     for (let i = 0; i < patterns.length; i++) {
-
       // [Optimization]: once patterns[i] is disqualified,
       // we don't want to keep checking it
       if (pointers[i] < 0) continue
@@ -15,9 +13,9 @@ const matchFactory = (opts = {}) => (patterns, ordered, strict = false) => {
       // [Optimazation]: once patterns[i] is fully matched,
       // we don't want to keep checking it
       if (pointers[i] === len) continue
-      
+
       const [k, v] = node.value[pointers[i]]
-      
+
       if (k < key) {
         pointers[i] = -1 // eliminate pattern
       } else if (k === key) {
@@ -37,9 +35,11 @@ const matchFactory = (opts = {}) => (patterns, ordered, strict = false) => {
     if (pointers[i] < 0) continue
 
     if (strict && pointers[i] !== ordered.length) continue
-    
-    if (pointers[i] >= patterns[i].value.length
-      && (!matchNode || patterns[i].value.length > matchNode.value.length)) {
+
+    if (
+      pointers[i] >= patterns[i].value.length &&
+      (!matchNode || patterns[i].value.length > matchNode.value.length)
+    ) {
       matchNode = patterns[i]
       capturedInput = patterns[i].value.slice(0, pointers[i])
     }
@@ -51,7 +51,7 @@ const matchFactory = (opts = {}) => (patterns, ordered, strict = false) => {
       result[key] = value
       return result
     }, {})
-    
+
     return {
       node: matchNode,
       captured

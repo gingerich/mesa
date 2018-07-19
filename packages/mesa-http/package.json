@@ -1,0 +1,33 @@
+{
+  "name": "@mesa/http",
+  "version": "0.0.0",
+  "description": "Http routing built with Mesa components",
+  "main": "./lib/index.js",
+  "repository": "https://github.com/gingerich/mesa/packages/mesa-http",
+  "author": "Marlin Gingerich <marlin@gingerich.io>",
+  "license": "MIT",
+  "dependencies": {
+    "@mesa/component": "^0.0.0",
+    "@mesa/core": "^0.0.0",
+    "debug": "^3.1.0",
+    "invariant": "^2.2.3",
+    "koa": "^2.5.0",
+    "koa-bodyparser": "^4.2.0",
+    "koa-compress": "^2.0.0",
+    "koa-helmet": "^3.3.0",
+    "koa-morgan": "^1.0.1",
+    "koa-mount": "^3.0.0",
+    "koa-response-time": "^2.0.0",
+    "methods": "^1.1.2",
+    "node-fetch": "^2.1.1",
+    "path-to-regexp": "^2.2.1"
+  },
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "npm run clean && babel src -d lib",
+    "clean": "rm -rf lib",
+    "lint": "eslint src --fix",
+    "test": "jest",
+    "test-cov": "npm run test -- --coverage"
+  }
+}
