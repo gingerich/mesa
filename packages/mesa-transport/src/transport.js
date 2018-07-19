@@ -1,6 +1,6 @@
 import invariant from 'invariant'
 
-class Transport {
+export default class Transport {
   constructor() {
     this.protocols = {}
   }
@@ -20,57 +20,81 @@ class Transport {
 
   makePlugin() {
     const self = this
-    let transport
+    let transports
 
     function plugin() {
-      return service => (transport = self.build(service))
+      return service => (transports = self.build(service))
     }
 
     plugin.start = function(bootstrap) {
-      invariant(transport, 'Calling start() before plugin has been used')
-      return bootstrap(transport)
+      invariant(transports, 'Calling start() before plugin has been used')
+
+      function getTransport(protocol) {
+        invariant(
+          transports[protocol],
+          `No protocol definition for ${protocol}`
+        )
+        return transports[protocol]
+      }
+
+      const listen = (protocol, ...args) =>
+        getTransport(protocol).listen(...args)
+      const client = (protocol, ...args) =>
+        getTransport(protocol).client(...args)
+
+      return bootstrap(transports, { listen, client })
     }
 
     return plugin
   }
 
   build(service) {
-    const transports = Object.entries(this.protocols).reduce(
+    return Object.entries(this.protocols).reduce(
       (layer, [protocol, transport]) => {
-        layer[protocol] = {
-          listen() {
-            throw new Error('Not Implemented')
-          },
-          client() {
-            throw new Error('Not Implemented')
-          }
+        const throwNotImplmented = () => {
+          throw new Error('Not Implemented')
         }
 
-        function setterForKey(key) {
-          return val => (layer[protocol][key] = val)
-        }
+        const ingress = new Interface('listen').define(throwNotImplmented)
+        const egress = new Interface('client').define(throwNotImplmented)
 
         transport.init({
           service,
-          listen: setterForKey('listen'),
-          client: setterForKey('client')
+          ingress,
+          egress
         })
+
+        const iface = (layer[protocol] = {})
+
+        ingress.apply(iface)
+        egress.apply(iface)
 
         return layer
       },
       {}
     )
-
-    function getTransport(protocol) {
-      invariant(transports[protocol], `No protocol definition for ${protocol}`)
-      return transports[protocol]
-    }
-
-    const listen = (protocol, ...args) => getTransport(protocol).listen(...args)
-    const client = (protocol, ...args) => getTransport(protocol).client(...args)
-
-    return { transports, listen, client }
   }
 }
 
-export default Transport
+class Interface {
+  constructor(name) {
+    invariant(name, 'Must supply name')
+    this.aliases = [name]
+  }
+
+  define(definition) {
+    this.definition = definition
+    return this
+  }
+
+  alias(name) {
+    this.aliases.push(name)
+    return this
+  }
+
+  apply(protocol) {
+    this.aliases.forEach(name => {
+      protocol[name] = this.definition
+    })
+  }
+}
