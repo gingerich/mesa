@@ -2,12 +2,11 @@ import { Component } from '@mesa/component'
 import { Stack } from './common'
 
 export class Router extends Component {
-
-  static destructure (key) {
+  static destructure(key) {
     return Router.spec({ destructure: key })
   }
 
-  compose (stack) {
+  compose(stack) {
     return (ctx, next) => {
       // Lookup handlers for msg
       const match = this.config.match(ctx.msg)

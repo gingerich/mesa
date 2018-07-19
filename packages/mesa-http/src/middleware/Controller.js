@@ -7,7 +7,7 @@ const debug = require('debug')('mesa-http:controller')
 
 // @path('/:id')
 export class Controller extends Mesa.Component {
-  compose () {
+  compose() {
     return Method.methods.reduce((stack, method) => {
       const { [method]: handler } = this.config
 

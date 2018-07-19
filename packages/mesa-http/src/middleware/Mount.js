@@ -4,11 +4,11 @@ import mount from 'koa-mount'
 const debug = require('debug')('mesa-http:mount')
 
 export class Mount extends Mesa.Component {
-  static path (path, ...components) {
+  static path(path, ...components) {
     return Mount.spec({ path }).use(...components)
   }
 
-  compose (middleware) {
+  compose(middleware) {
     const { path = '/' } = this.config
     if (path === '/') {
       debug("Useless mount for path '/'")

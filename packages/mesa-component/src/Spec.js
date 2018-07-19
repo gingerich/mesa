@@ -1,11 +1,11 @@
 const debug = require('debug')('mesa:spec')
 
 export class Spec {
-  static of (type, config) {
+  static of(type, config) {
     return new this(type, config, subcomponents)
   }
 
-  static make (spec, context) {
+  static make(spec, context) {
     const { type, config } = spec
 
     const typeFactory = makeTypeFactory(type)
@@ -13,13 +13,13 @@ export class Spec {
     return typeFactory({ ...config }, context)
   }
 
-  constructor (type, config = {}) {
+  constructor(type, config = {}) {
     this.type = type
     this.config = { ...config }
     this.config.subcomponents = this.config.subcomponents || []
   }
 
-  set (key, value) {
+  set(key, value) {
     if (typeof key === 'object') {
       Object.assign(this.config, key)
     } else {
@@ -28,7 +28,7 @@ export class Spec {
     return this
   }
 
-  use (...components) {
+  use(...components) {
     if (Array.isArray(components[0])) {
       components = components[0]
     }
@@ -37,13 +37,13 @@ export class Spec {
     return this
   }
 
-  subcomponents (value) {
+  subcomponents(value) {
     this.config.subcomponents = value
     return this
   }
 
-  ref (fn) {
-    function refDecorator (instance) {
+  ref(fn) {
+    function refDecorator(instance) {
       fn(instance)
       return instance
     }
@@ -64,10 +64,11 @@ export class Spec {
   // }
 }
 
-function makeTypeFactory (Type) {
+function makeTypeFactory(Type) {
   return (...args) =>
-    Object.prototype.hasOwnProperty.call(Type, 'prototype') ?
-      new Type(...args) : Type(...args)
+    Object.prototype.hasOwnProperty.call(Type, 'prototype')
+      ? new Type(...args)
+      : Type(...args)
 }
 
 export default Spec

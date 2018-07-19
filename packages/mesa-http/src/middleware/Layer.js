@@ -7,7 +7,7 @@ export class Layer extends Mesa.Component {
   //   return this.config.path
   // }
 
-  compose () {
+  compose() {
     const { path, params } = this.config
 
     return Path.spec({ path })

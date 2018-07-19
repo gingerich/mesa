@@ -6,8 +6,7 @@ import Spec from './Spec'
 const debug = require('debug')('mesa:component')
 
 export class Component {
-
-  static spec (config, factory = this) {
+  static spec(config, factory = this) {
     const Specification = this.Spec || class extends Spec {}
 
     // Apply plugins
@@ -16,12 +15,12 @@ export class Component {
     return new Specification(factory, config)
   }
 
-  static of (source) {
+  static of(source) {
     if (source instanceof this) {
       return source
     } else if (typeof source === 'function') {
       return class extends this {
-        compose () {
+        compose() {
           return source(this.config, this.context)
         }
       }
@@ -30,35 +29,35 @@ export class Component {
     }
   }
 
-  static functional (fn) {
+  static functional(fn) {
     return class extends this {
-      compose () {
+      compose() {
         return fn(this.config, this.context)
       }
     }
   }
 
-  constructor (config, context) {
+  constructor(config, context) {
     this.config = Object.assign(get.bind(null, config), config)
     this.context = context
   }
 
-  componentWillMount () {
+  componentWillMount() {
     // Component lifecycle method
   }
 
-  componentDidMount () {
+  componentDidMount() {
     // Component lifecycle method
   }
 
   /*
    * Return middleware function (See http://koajs.com)
    */
-  compose () {
+  compose() {
     throw new Error(`${this.constructor.name} must implement compose()`)
   }
 
-  toJSON () {
+  toJSON() {
     return JSON.stringify(this.constructor.name)
   }
 }

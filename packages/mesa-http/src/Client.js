@@ -2,15 +2,15 @@ import fetch from 'node-fetch'
 import Mesa from '@mesa/core'
 
 export class Client extends Mesa.Component {
-  static of (url) {
+  static of(url) {
     return Client.spec({ url })
   }
 
-  compose (compose) {
+  compose(compose) {
     const middleware = compose(this.config.subcomponents)
     const { url, ...fetchOpts } = this.config
 
-    return (msg) => {
+    return msg => {
       const options = {
         ...fetchOpts,
         method: 'POST',
@@ -19,7 +19,7 @@ export class Client extends Mesa.Component {
 
       options.headers = {
         ...options.headers,
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'application/json'
       }
 

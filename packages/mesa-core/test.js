@@ -27,27 +27,31 @@ const Mesa = require('./lib')
 // const ContextAwareTest = context(service)(Test)
 
 // service.ns({ ns: 'test' })
-  // .action({a:1}, msg => ({ ...msg, done: 'ok' }))
-  // .action({a:2}, ContextAwareTest.spec({ value: 'test' }))
-  // .action({a:3}, msg => msg)
+// .action({a:1}, msg => ({ ...msg, done: 'ok' }))
+// .action({a:2}, ContextAwareTest.spec({ value: 'test' }))
+// .action({a:3}, msg => msg)
 
-const testService = Mesa.createService()
-  .action({foo:'bar'}, () => ({ you: 'bad boy lance' }))
+const testService = Mesa.createService().action({ foo: 'bar' }, () => ({
+  you: 'bad boy lance'
+}))
 
 Mesa.createService(() => ({
   actions: [
-    Mesa.action({a:1}, ({msg}) => ({ ...msg, done: 'ok' })),
+    Mesa.action({ a: 1 }, ({ msg }) => ({ ...msg, done: 'ok' })),
     // Mesa.action({a:2}, ContextAwareTest.spec({ value: 'test' }))
-    Mesa.action({foo:'foo'}, () => 'wut'),
-    Mesa.action({foo:'bar'}, ctx => ctx.defer()),
+    Mesa.action({ foo: 'foo' }, () => 'wut'),
+    Mesa.action({ foo: 'bar' }, ctx => ctx.defer()),
     // Mesa.action({foo:'bar' }, ctx => ({ ...ctx.defer(), a: 1 })),
-    Mesa.action(['add', {test:true}], ({msg:[c,{a,b}]}) => ({ sum: a+b }))
+    Mesa.action(['add', { test: true }], ({ msg: [c, { a, b }] }) => ({
+      sum: a + b
+    }))
   ]
 }))
-.use(testService)
+  .use(testService)
 
-// // .call({ ns: 'test', a: 2 }).then(res => console.log(res))
-.call({ foo:'bar' }).then(res => console.log(res))
+  // // .call({ ns: 'test', a: 2 }).then(res => console.log(res))
+  .call({ foo: 'bar' })
+  .then(res => console.log(res))
 // .call('add', { test: true, a: 1, b: 5 }).then(res => console.log(res))
 
 // Mesa.createService()

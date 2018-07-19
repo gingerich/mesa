@@ -7,26 +7,23 @@ import Spec from './Spec'
 * Reconcile a spec to its functional representation
 * Returns a middleware function composition representative of the given spec
 */
-export function compose (root, context) {
+export function compose(root, context) {
   let handler
 
-  return function (data, next) {
-
-    function defer (data) {
+  return function(data, next) {
+    function defer(data) {
       if (!next) return Promise.resolve(data)
       return next(data)
     }
 
     if (!handler) {
-
-      function innerCompose (spec, context) {
-
+      function innerCompose(spec, context) {
         // if (Array.isArray(spec)) {
         //   return purpose(spec.map(s => innerCompose(s, context, parent)))
         // }
 
         if (typeof spec === 'function') {
-          return function (data, next) {
+          return function(data, next) {
             next.defer = defer
             return Promise.resolve(spec(data, next))
           }
@@ -43,12 +40,12 @@ export function compose (root, context) {
         // context = component.getChildContext()
 
         // Performs composition on a subcomponent array
-        function composeSubcomponents (subcomponents) {
+        function composeSubcomponents(subcomponents) {
           return purpose(subcomponents.map(s => innerCompose(s, context)))
         }
 
         // Compose this components subcomponents
-        function stack () {
+        function stack() {
           return composeSubcomponents(component.config.subcomponents)
         }
 
@@ -78,8 +75,6 @@ export function compose (root, context) {
 
         // Trigger component lifecycle hook
         // component.componentWillMount()
-
-
 
         /*
         * Let the component define its composition by calling its compose() method

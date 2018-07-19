@@ -1,7 +1,7 @@
 import { Component } from '@mesa/component'
 
 export class Handler extends Component {
-  compose (stack) {
+  compose(stack) {
     const middleware = stack()
 
     return async (ctx, next) => {

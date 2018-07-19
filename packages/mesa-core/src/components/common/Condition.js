@@ -1,11 +1,11 @@
 import { Component } from '@mesa/component'
 
 export class Condition extends Component {
-  static on (condition) {
+  static on(condition) {
     return Condition.spec({ condition })
   }
 
-  compose (stack) {
+  compose(stack) {
     const middleware = stack()
     const { condition: cond, negative } = this.config
 
@@ -30,12 +30,12 @@ export class Condition extends Component {
 //   return Condition.spec({ condition })
 // }
 
-Condition.on.not = function (condition) {
+Condition.on.not = function(condition) {
   return Condition.spec({ condition, negative: true })
 }
 
 export class Branch extends Component {
-  compose () {
+  compose() {
     const { condition } = this.config
     return Condition.spec({ condition })
       .use(this.config.subcomponents)

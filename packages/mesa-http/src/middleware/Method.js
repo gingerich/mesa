@@ -2,7 +2,7 @@ import Mesa, { Match } from '@mesa/core'
 import methods from 'methods'
 
 export class Method extends Mesa.Component {
-  static matches (method, matchMethod) {
+  static matches(method, matchMethod) {
     if (!matchMethod) return true
     matchMethod = matchMethod.toUpperCase()
     if (method === matchMethod) return true
@@ -10,18 +10,19 @@ export class Method extends Mesa.Component {
     return false
   }
 
-  match (method) {
+  match(method) {
     return Method.matches(method, this.config.method)
   }
 
-  compose () {
-    return Match.accept({ method: method => this.match(method) })
-      .use(this.config.subcomponents)
+  compose() {
+    return Match.accept({ method: method => this.match(method) }).use(
+      this.config.subcomponents
+    )
   }
 }
 
-methods.forEach((method) => {
-  Method[method] = function (config) {
+methods.forEach(method => {
+  Method[method] = function(config) {
     return Method.spec({ ...config, method })
   }
 })

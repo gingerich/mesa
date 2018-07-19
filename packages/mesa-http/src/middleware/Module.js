@@ -7,31 +7,35 @@ import Router from './Router'
 import Stack from './Stack'
 
 export class Module extends Mesa.Component {
-  static routes () {
+  static routes() {
     return []
   }
 
-  get path () {
+  get path() {
     return this.config.path || this.constructor.PATH
   }
 
-  get directory () {
+  get directory() {
     return this.config.directory
   }
 
-  get routes () {
+  get routes() {
     if (typeof this.constructor.routes === 'function') {
       return this.constructor.routes()
     }
     return this.config.routes || []
   }
 
-  extend (spec) {
+  extend(spec) {
     return spec
   }
 
-  compose () {
-    const { routes = [], loader = new Loader(), orderSubcomponents = 'pre' } = this.config
+  compose() {
+    const {
+      routes = [],
+      loader = new Loader(),
+      orderSubcomponents = 'pre'
+    } = this.config
     const routesList = this.constructor.routes(this.config)
     routesList.push(...routes)
 
@@ -56,8 +60,8 @@ export class Module extends Mesa.Component {
   }
 }
 
-function routesPlugin (routes) {
-  return (contents) => {
+function routesPlugin(routes) {
+  return contents => {
     const addRoute = (router, component) => {
       if (typeof component === 'function') {
         return router.use(component)
@@ -90,22 +94,26 @@ function routesPlugin (routes) {
 }
 
 export class Loader {
-  static loadDir (dirname, options) {
-    const opts = Object.assign({}, {
-      include: /^([^\.].+)\.js(on)?$/,
-      recursive: true,
-      visit: obj => obj.default || obj, // es6 compat
-      rename: name => name.replace(/(_\w)/g, m => m[1].toUpperCase()) // snake_case to camelCase
-    }, options)
+  static loadDir(dirname, options) {
+    const opts = Object.assign(
+      {},
+      {
+        include: /^([^\.].+)\.js(on)?$/,
+        recursive: true,
+        visit: obj => obj.default || obj, // es6 compat
+        rename: name => name.replace(/(_\w)/g, m => m[1].toUpperCase()) // snake_case to camelCase
+      },
+      options
+    )
 
     return requireDirectory(module, dirname, opts)
   }
 
-  constructor () {
+  constructor() {
     this.plugins = []
   }
 
-  use (selector, plugin) {
+  use(selector, plugin) {
     if (typeof selector !== 'string') {
       plugin = selector
       selector = undefined
@@ -117,7 +125,7 @@ export class Loader {
     return this
   }
 
-  load (dirname, options) {
+  load(dirname, options) {
     let contents
     try {
       contents = Loader.loadDir(dirname, options)

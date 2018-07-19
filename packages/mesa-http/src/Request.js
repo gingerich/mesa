@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 import Mesa from '@mesa/core'
 
 export class Request extends Mesa.Component {
-  compose (compose) {
+  compose(compose) {
     const middleware = compose(this.config.subcomponents)
     const { url, ...options } = this.config
 
@@ -13,11 +13,12 @@ export class Request extends Mesa.Component {
   }
 }
 
-;['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
-.forEach((method) => {
-  Request[method] = function (config) {
-    return Request.spec({ ...config, method: method.toUpperCase() })
+;['get', 'post', 'put', 'patch', 'delete', 'head', 'options'].forEach(
+  method => {
+    Request[method] = function(config) {
+      return Request.spec({ ...config, method: method.toUpperCase() })
+    }
   }
-})
+)
 
 export default Request

@@ -3,10 +3,9 @@ import { matching } from '@mesa/util'
 import Condition from './Condition'
 
 export class Accept extends Component {
-  compose () {
+  compose() {
     const { matches = [] } = this.config
-    return Condition.on(matching(matches))
-      .use(this.config.subcomponents)
+    return Condition.on(matching(matches)).use(this.config.subcomponents)
   }
 }
 

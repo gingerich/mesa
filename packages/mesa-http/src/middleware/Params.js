@@ -1,21 +1,24 @@
 import Mesa from '@mesa/core'
 
 export class Params extends Mesa.Component {
-  constructor (config) {
+  constructor(config) {
     super(config)
     this.params = config.params || {}
   }
 
-  paramHandlers (params) {
-    const handlers = params.filter(param => !!this.params[param.name])
+  paramHandlers(params) {
+    const handlers = params
+      .filter(param => !!this.params[param.name])
       .map(param => this.params[param.name])
     return Array.prototype.concat.apply([], handlers)
   }
 
-  compose () {
+  compose() {
     return async (ctx, next) => {
       if (!ctx.parsedPath) {
-        throw new Error('Missing ctx.parsedPath. You probably meant to use the Path component preceeding Params')
+        throw new Error(
+          'Missing ctx.parsedPath. You probably meant to use the Path component preceeding Params'
+        )
       }
       const { params, args } = ctx.parsedPath
       const handlers = this.paramHandlers(params)

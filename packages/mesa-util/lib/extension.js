@@ -1,69 +1,67 @@
-"use strict";
+'use strict'
 
 function Extension(...args) {
   if (!(this instanceof Extension)) {
-    return new Extension(...args);
+    return new Extension(...args)
   }
 
-  this.plugins = {};
+  this.plugins = {}
 
   if (args) {
-    this.plugin(...args);
+    this.plugin(...args)
   }
 }
 
-Extension.prototype.plugin = function (name, plug) {
+Extension.prototype.plugin = function(name, plug) {
   if (name instanceof Extension) {
-    name.extend(this.plugins);
-    return this;
+    name.extend(this.plugins)
+    return this
   }
 
   if (typeof name === 'function') {
-    return name.call(this, this.plugins) || this;
+    return name.call(this, this.plugins) || this
   }
 
-  let ext;
+  let ext
 
   if (typeof name !== 'string') {
-    ext = name;
+    ext = name
   } else {
     ext = {
       [name]() {
         if (typeof plug === 'string') {
-          return this[plug].apply(this, arguments);
+          return this[plug].apply(this, arguments)
         }
 
-        return plug.apply(this, arguments) || this;
+        return plug.apply(this, arguments) || this
       }
-
-    };
+    }
   }
 
-  Object.assign(this.plugins, ext);
-  return this;
-};
+  Object.assign(this.plugins, ext)
+  return this
+}
 
-Extension.prototype.extend = function (target) {
-  const extension = new Extension(); // if (typeof target === 'function' && target.prototype) {
+Extension.prototype.extend = function(target) {
+  const extension = new Extension() // if (typeof target === 'function' && target.prototype) {
   //   Object.assign(target.prototype, this.plugins)
   // } else {
   //   Object.assign(target, this.plugins)
   // }
 
   if (typeof target === 'function' && target.prototype) {
-    extension.plugins = target.prototype;
+    extension.plugins = target.prototype
   } else {
-    extension.plugins = target;
+    extension.plugins = target
   }
 
-  extension.plugin(this.plugins);
-  return target;
-}; // Alias use === plugin
+  extension.plugin(this.plugins)
+  return target
+} // Alias use === plugin
 
+Extension.prototype.use = Extension.prototype.plugin
+module.exports = Extension // Allow use as a singleton
 
-Extension.prototype.use = Extension.prototype.plugin;
-module.exports = Extension; // Allow use as a singleton
-
-const extension = new Extension();
-module.exports.plugin = extension.plugin.bind(extension);
-module.exports.extend = extension.extend.bind(extension);
+const extension = new Extension()
+module.exports.plugin = extension.plugin.bind(extension)
+module.exports.extend = extension.extend.bind(extension)

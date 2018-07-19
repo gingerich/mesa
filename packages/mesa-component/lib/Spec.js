@@ -1,52 +1,79 @@
-"use strict";
+'use strict'
 
-Object.defineProperty(exports, "__esModule", {
+Object.defineProperty(exports, '__esModule', {
   value: true
-});
-exports.default = exports.Spec = void 0;
+})
+exports.default = exports.Spec = void 0
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+function _objectSpread(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {}
+    var ownKeys = Object.keys(source)
+    if (typeof Object.getOwnPropertySymbols === 'function') {
+      ownKeys = ownKeys.concat(
+        Object.getOwnPropertySymbols(source).filter(function(sym) {
+          return Object.getOwnPropertyDescriptor(source, sym).enumerable
+        })
+      )
+    }
+    ownKeys.forEach(function(key) {
+      _defineProperty(target, key, source[key])
+    })
+  }
+  return target
+}
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    })
+  } else {
+    obj[key] = value
+  }
+  return obj
+}
 
 // import compose from 'koa-compose'
 // import Component from '../components/Component'
 // import Except from '../components/Except'
 // import Mount from '../components/Mount'
-const debug = require('debug')('mesa:spec');
+const debug = require('debug')('mesa:spec')
 
 function defineSubcomponents(config) {
-  const {
-    subcomponents = []
-  } = config;
+  const { subcomponents = [] } = config
   Object.defineProperty(config, 'subcomponents', {
     value: subcomponents,
     writable: true
-  });
+  })
 }
 
 class Spec {
-  static of(type, config
-  /*, ...subcomponents*/
+  static of(
+    type,
+    config
+    /*, ...subcomponents*/
   ) {
-    return new this(type, config, subcomponents);
+    return new this(type, config, subcomponents)
   }
 
   static make(spec, context) {
-    const {
-      type,
-      config
-    } = spec;
-    const typeFactory = makeTypeFactory(type);
-    return typeFactory(_objectSpread({}, config), context);
+    const { type, config } = spec
+    const typeFactory = makeTypeFactory(type)
+    return typeFactory(_objectSpread({}, config), context)
   }
 
-  constructor(type, config = {}
-  /*, subcomponents = []*/
+  constructor(
+    type,
+    config = {}
+    /*, subcomponents = []*/
   ) {
-    this.type = type;
-    this.config = _objectSpread({}, config);
-    this.config.subcomponents = []; // defineSubcomponents(this.config)
+    this.type = type
+    this.config = _objectSpread({}, config)
+    this.config.subcomponents = [] // defineSubcomponents(this.config)
     // this.config = {
     //   subcomponents: [],
     //   ...config
@@ -56,36 +83,35 @@ class Spec {
 
   set(key, value) {
     if (typeof key === 'object') {
-      Object.assign(this.config, key);
+      Object.assign(this.config, key)
     } else {
-      this.config[key] = value;
+      this.config[key] = value
     }
 
-    return this;
+    return this
   }
 
   use(...components) {
     if (Array.isArray(components[0])) {
-      components = components[0];
+      components = components[0]
     }
 
-    this.config.subcomponents.push(...components);
-    return this;
+    this.config.subcomponents.push(...components)
+    return this
   }
 
   subcomponents(value) {
-    this.config.subcomponents = value;
-    return this;
+    this.config.subcomponents = value
+    return this
   }
 
   ref(fn) {
     function refDecorator(instance) {
-      fn(instance);
-      return instance;
+      fn(instance)
+      return instance
     } // this.registry.decorator('component', refDecorator)
 
-
-    return this;
+    return this
   } // make (context) {
   //   const { factory, config, subcomponents } = this
   //   // const TypeConstructor = makeTypeConstructor(factory)
@@ -95,15 +121,16 @@ class Spec {
   // compose (context) {
   //   return compose(this, context)
   // }
-
-
 }
 
-exports.Spec = Spec;
+exports.Spec = Spec
 
 function makeTypeFactory(Type) {
-  return (...args) => Object.prototype.hasOwnProperty.call(Type, 'prototype') ? new Type(...args) : Type(...args);
+  return (...args) =>
+    Object.prototype.hasOwnProperty.call(Type, 'prototype')
+      ? new Type(...args)
+      : Type(...args)
 }
 
-var _default = Spec;
-exports.default = _default;
+var _default = Spec
+exports.default = _default

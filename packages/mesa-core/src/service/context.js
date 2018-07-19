@@ -1,6 +1,6 @@
 import { Component } from '@mesa/component'
 
-export function createContext (defaultValue) {
+export function createContext(defaultValue) {
   const context = {
     currentValue: defaultValue,
     defaultValue
@@ -41,7 +41,7 @@ export function createContext (defaultValue) {
   *   .use(Consumer.spec({ subcomponents: value => () => value }))
   */
   class Provider extends Component {
-    compose (stack) {
+    compose(stack) {
       const middleware = stack()
 
       return async (msg, next) => {
@@ -60,7 +60,7 @@ export function createContext (defaultValue) {
   }
 
   class Consumer extends Component {
-    compose () {
+    compose() {
       return this.config.subcomponents(context.currentValue)
     }
   }

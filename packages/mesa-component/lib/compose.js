@@ -1,31 +1,33 @@
-"use strict";
+'use strict'
 
-Object.defineProperty(exports, "__esModule", {
+Object.defineProperty(exports, '__esModule', {
   value: true
-});
-exports.compose = compose;
-exports.default = void 0;
+})
+exports.compose = compose
+exports.default = void 0
 
-var _koaCompose = _interopRequireDefault(require("koa-compose"));
+var _koaCompose = _interopRequireDefault(require('koa-compose'))
 
-var _purposejs = _interopRequireDefault(require("purposejs"));
+var _purposejs = _interopRequireDefault(require('purposejs'))
 
-var _Component = _interopRequireDefault(require("./Component"));
+var _Component = _interopRequireDefault(require('./Component'))
 
-var _Spec = _interopRequireDefault(require("./Spec"));
+var _Spec = _interopRequireDefault(require('./Spec'))
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj }
+}
 
 /*
 * Reconcile a spec to its functional representation
 * Returns a middleware function composition representative of the given spec
 */
 function compose(root, context) {
-  let handler;
-  return function (data, next) {
+  let handler
+  return function(data, next) {
     function defer(data) {
-      if (!next) return Promise.resolve(data);
-      return next(data);
+      if (!next) return Promise.resolve(data)
+      return next(data)
     }
 
     if (!handler) {
@@ -34,32 +36,30 @@ function compose(root, context) {
         //   return purpose(spec.map(s => innerCompose(s, context, parent)))
         // }
         if (typeof spec === 'function') {
-          return function (data, next) {
-            next.defer = defer;
-            return Promise.resolve(spec(data, next));
-          };
+          return function(data, next) {
+            next.defer = defer
+            return Promise.resolve(spec(data, next))
+          }
         } // Use the spec to construct a component instance
 
-
-        const component = _Spec.default.make(spec, context); // Ensure a component instance was created
-
+        const component = _Spec.default.make(spec, context) // Ensure a component instance was created
 
         if (!(component instanceof _Component.default)) {
-          throw new TypeError('Expected spec to generate Component type');
+          throw new TypeError('Expected spec to generate Component type')
         } // context = component.getChildContext()
         // Performs composition on a subcomponent array
 
-
         function composeSubcomponents(subcomponents) {
-          return (0, _purposejs.default)(subcomponents.map(s => innerCompose(s, context)));
+          return (0, _purposejs.default)(
+            subcomponents.map(s => innerCompose(s, context))
+          )
         } // Compose this components subcomponents
 
-
         function stack() {
-          return composeSubcomponents(component.config.subcomponents);
+          return composeSubcomponents(component.config.subcomponents)
         }
 
-        stack.compose = composeSubcomponents; // // Build a function that performs composition on the subcomponents
+        stack.compose = composeSubcomponents // // Build a function that performs composition on the subcomponents
         // function middleware (subcomponents) {
         //   // return innerCompose(subcomponents, component.getChildContext(), component)
         //   return purpose(subcomponents.map(s => innerCompose(s, component.getChildContext(), component)))
@@ -86,19 +86,19 @@ function compose(root, context) {
         * Reduce the result to its functional composition by making a recursive call
         */
 
-        const fn = innerCompose(component.compose(stack), context); // Trigger component lifecycle hook
+        const fn = innerCompose(component.compose(stack), context) // Trigger component lifecycle hook
         // component.componentDidMount(parent)
         // Ensure function contains reference to the spec that produced it
 
-        return Object.assign(fn, spec);
+        return Object.assign(fn, spec)
       }
 
-      handler = innerCompose(root, context);
+      handler = innerCompose(root, context)
     }
 
-    return handler(data, defer);
-  };
+    return handler(data, defer)
+  }
 }
 
-var _default = compose;
-exports.default = _default;
+var _default = compose
+exports.default = _default

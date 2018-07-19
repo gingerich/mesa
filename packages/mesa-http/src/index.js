@@ -1,23 +1,25 @@
 import { Client } from './Client'
 import { Server } from './Server'
 
-export function server (opts) {
+export function server(opts) {
   return new Server(opts)
 }
 
-export function client (opts) {
+export function client(opts) {
   return Client.spec(opts)
 }
 
-export function listen (component, ...args) {
-  return server().use(component).listen(...args)
+export function listen(component, ...args) {
+  return server()
+    .use(component)
+    .listen(...args)
 }
 
-export function plugin (opts) {
+export function plugin(opts) {
   return mesa => listen(mesa, opts)
 }
 
-export function transport (options) {
+export function transport(options) {
   return ({ service, ...transport }) => {
     const serverOpts = {
       prefix: '/call',
@@ -31,13 +33,14 @@ export function transport (options) {
 
     transport.listen((...args) => http.listen(...args))
     transport.client((action, ...args) =>
-      service.action(action, client(...args)))
+      service.action(action, client(...args))
+    )
   }
 }
 
-export function koaMiddleware (component) {
-  return async function (ctx, next) {
-    const res = await compose(component, /* context? */)(ctx, function (msg) {
+export function koaMiddleware(component) {
+  return async function(ctx, next) {
+    const res = await compose(component /* context? */)(ctx, function(msg) {
       return next().then(() => msg)
     })
 

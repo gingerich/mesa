@@ -4,13 +4,13 @@ import pathToRegexp from 'path-to-regexp'
 const debug = require('debug')('mesa-http:path')
 
 export class Path extends Mesa.Component {
-  constructor (config, context) {
+  constructor(config, context) {
     super(config, context)
     this.params = []
     this.regex = pathToRegexp(config.path, this.params, config.options)
   }
 
-  match (ctx) {
+  match(ctx) {
     const { consumeMatched = true } = this.config
     // const match = this.trie.match(ctx.path)
     const match = this.regex.exec(ctx.path)
@@ -44,13 +44,12 @@ export class Path extends Mesa.Component {
     return false
   }
 
-  compose () {
-    return Match.accept(ctx => this.match(ctx))
-      .use(this.config.subcomponents)
+  compose() {
+    return Match.accept(ctx => this.match(ctx)).use(this.config.subcomponents)
   }
 }
 
-function decode (val) {
+function decode(val) {
   return val ? decodeURIComponent(val) : null
 }
 
