@@ -11,17 +11,20 @@ export class Router extends Component {
       // Lookup handlers for msg
       const match = this.config.match(ctx.msg)
 
-      // No handlers to accept msg
+      // No handlers for msg
       if (!match) {
         return next(ctx)
       }
 
-      const { destructure, balanceComponent = Stack.spec() } = this.config
+      const {
+        destructure = 'body',
+        balanceComponent = Stack.spec()
+      } = this.config
 
       // Optionally destructure msg
-      const { [destructure]: payload } = ctx.msg
-      if (payload) {
-        ctx.msg = payload
+      const { [destructure]: body } = ctx.msg
+      if (body) {
+        ctx.msg = body
       }
 
       const balancer = balanceComponent.use(match.node.handlers)

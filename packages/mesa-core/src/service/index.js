@@ -1,9 +1,18 @@
 import namespace from './namespace'
 import { Service } from './service'
 
-export function createService(options = {}) {
+export function create(options = {}) {
   const ns = namespace({ match: { nested: true } })
-  const service = new Service(ns)
+
+  if (typeof options === 'string') {
+    options = { name: options }
+  }
+
+  const serviceOptions = {
+    name: options.name
+  }
+
+  const service = new Service(ns, serviceOptions)
 
   const Context = {} // TODO?
 
@@ -38,7 +47,7 @@ export function createService(options = {}) {
     ...upstream,
 
     // Use default namespace
-    () => service.use(ns.router()),
+    // () => service.use(ns.router()),
 
     ...actions
   ]

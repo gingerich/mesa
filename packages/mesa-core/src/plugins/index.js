@@ -14,3 +14,5 @@ export function ns(namespace, ...actions) {
   return service =>
     actions.reduce((ns, action) => action(ns), service.ns(namespace))
 }
+
+export default module.exports

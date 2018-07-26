@@ -1,16 +1,46 @@
 import { matchbox } from '@mesa/util'
-import { Handler, Router } from '../components'
+import { Service } from './service'
+import { Stack } from '../components/common'
+import { Container, Handler, Router } from '../components'
 
 export default options => new Namespace(options)
 
+const defaultOptions = {
+  router: {
+    destructure: 'body'
+  }
+}
+
 export class Namespace {
   constructor(options) {
-    this.options = options
+    this.options = { ...defaultOptions, ...options }
     this.registry = matchbox(options.match)
+    this.container = Container.spec({ namespace: this })
+    // this.router = Router.spec({
+    //   match: msg => this.match(msg)
+    // })
+  }
+
+  use(ns, component) {
+    if (typeof component === 'undefined') {
+      component = ns
+      if (component instanceof Service) {
+        component = component.getSpec()
+      }
+      this.container.use(component)
+      return this
+    }
+
+    this.ns(ns).use(component)
+    return this
   }
 
   action(pattern, component) {
     const handler = Handler.spec().use(component)
+
+    if (typeof pattern === 'string') {
+      pattern = { act: pattern }
+    }
 
     defineHandler(this.registry, pattern, handler)
 
@@ -23,7 +53,7 @@ export class Namespace {
     }
 
     const pattern =
-      typeof namespace !== 'object' ? { ns: namespace } : namespace
+      typeof namespace === 'string' ? { ns: namespace } : namespace
 
     const ns = new Namespace(options)
 
@@ -37,8 +67,17 @@ export class Namespace {
   }
 
   router(options) {
-    const match = msg => this.match(msg)
-    return Router.spec({ match, ...this.options.router, ...options })
+    const config = {
+      match: msg => {
+        return this.match(msg)
+      },
+      ...this.options.router,
+      ...options
+    }
+
+    return Stack.spec()
+      .use(this.container)
+      .use(Router.spec(config))
   }
 }
 

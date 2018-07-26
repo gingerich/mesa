@@ -1,7 +1,10 @@
-export * from './service'
-export * from './service/context'
+export * from './mesa'
 
-export * from './plugins'
+export { Broker as ServiceBroker } from './service/broker'
+export * from './service/context'
+export * from './service/message'
+
+export { default as plugins } from './plugins'
 export * from './components'
 
 export * from '@mesa/component'
