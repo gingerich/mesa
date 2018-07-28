@@ -16,9 +16,6 @@ export class Namespace {
     this.options = { ...defaultOptions, ...options }
     this.registry = matchbox(options.match)
     this.container = Container.spec({ namespace: this })
-    // this.router = Router.spec({
-    //   match: msg => this.match(msg)
-    // })
   }
 
   use(ns, component) {

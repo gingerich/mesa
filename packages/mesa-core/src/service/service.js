@@ -20,7 +20,6 @@ export class Service extends EventEmitter {
     this.options = options
     this.name = options.name
     this.namespace = namespace
-    // this.container = Container.spec({ service: this })
     this.context = Object.create(context)
   }
 
@@ -29,11 +28,6 @@ export class Service extends EventEmitter {
   */
 
   use(ns, component) {
-    // if (typeof component === 'undefined') {
-    //   this.container.use(ns)
-    //   return this
-    // }
-
     this.namespace.use(ns, component)
     return this
   }
@@ -87,8 +81,6 @@ export class Service extends EventEmitter {
   }
 
   getSpec() {
-    // return this.container
-    // return Container.spec().use(this.namespace.router())
     return this.namespace.router()
   }
 
@@ -96,7 +88,7 @@ export class Service extends EventEmitter {
     return compose(
       this.getSpec(),
       this
-    ) // IDEA: create context object to pass
+    )
   }
 }
 
