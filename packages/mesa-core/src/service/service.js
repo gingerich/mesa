@@ -17,8 +17,8 @@ export class Service extends EventEmitter {
   constructor(namespace, options) {
     super('service')
     this.id = uuidv1()
-    this.name = options.name
     this.options = options
+    this.name = options.name
     this.namespace = namespace
     // this.container = Container.spec({ service: this })
     this.context = Object.create(context)
@@ -71,6 +71,10 @@ export class Service extends EventEmitter {
     return this.handler(ctx, () => null)
   }
 
+  partial(...args) {
+    return this.call.bind(this, ...args)
+  }
+
   /*
   * Utility methods
   */
@@ -86,11 +90,6 @@ export class Service extends EventEmitter {
     // return this.container
     // return Container.spec().use(this.namespace.router())
     return this.namespace.router()
-  }
-
-  start(...args) {
-    this.emit('start', ...args)
-    return this
   }
 
   compose() {
