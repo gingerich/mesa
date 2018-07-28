@@ -37,6 +37,10 @@ export class Broker {
     return this.service.call(...args)
   }
 
+  partial(...args) {
+    return this.service.partial(...args)
+  }
+
   plugin(name) {
     return service => this.use(name || service.name, service)
   }

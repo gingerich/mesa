@@ -1,3 +1,4 @@
+import memoize from 'fast-memoize'
 import { matchbox } from '@mesa/util'
 import { Service } from './service'
 import { Stack } from '../components/common'
@@ -64,13 +65,8 @@ export class Namespace {
   }
 
   router(options) {
-    const config = {
-      match: msg => {
-        return this.match(msg)
-      },
-      ...this.options.router,
-      ...options
-    }
+    const match = memoize(msg => this.match(msg))
+    const config = { match, ...this.options.router, ...options }
 
     return Stack.spec()
       .use(this.container)
