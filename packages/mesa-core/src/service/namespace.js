@@ -23,7 +23,7 @@ export class Namespace {
     if (typeof component === 'undefined') {
       component = ns
       if (component instanceof Service) {
-        component = component.getSpec()
+        component = component.toComponent()
       }
       this.container.use(component)
       return this
@@ -45,13 +45,14 @@ export class Namespace {
     return this
   }
 
-  ns(namespace, options = {}) {
-    if (Array.isArray(namespace)) {
-      return namespace.reduce((result, ns) => result.ns(ns, opts), this)
+  ns(pattern, options = {}) {
+    if (typeof pattern === 'string') {
+      pattern = pattern.split('.').map(ns => ({ ns }))
     }
 
-    const pattern =
-      typeof namespace === 'string' ? { ns: namespace } : namespace
+    if (Array.isArray(pattern)) {
+      return pattern.reduce((result, ns) => result.ns(ns, options), this)
+    }
 
     const ns = new Namespace(options)
 
@@ -64,9 +65,9 @@ export class Namespace {
     return this.registry.match(pattern, strict)
   }
 
-  router(options) {
+  router(options = this.options.router) {
     const match = memoize(msg => this.match(msg))
-    const config = { match, ...this.options.router, ...options }
+    const config = { match, ...options }
 
     return Stack.spec()
       .use(this.container)

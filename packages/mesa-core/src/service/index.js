@@ -1,25 +1,10 @@
+import invariant from 'invariant'
 import { Namespace } from './namespace'
 import { Service } from './service'
 
-const debug = require('debug')('createService')
+const debug = require('debug')('mesa:service')
 
 export function create(schema = {}) {
-  const namespace = new Namespace({ match: { nested: true } })
-
-  if (typeof schema === 'string') {
-    schema = { name: schema }
-  }
-
-  if (!schema.name) {
-    debug('Creating an unnamed service is not recommended')
-  }
-
-  const options = {
-    name: schema.name
-  }
-
-  const service = new Service(namespace, options)
-
   const Context = {} // TODO?
 
   if (typeof schema === 'function') {
@@ -28,10 +13,25 @@ export function create(schema = {}) {
     schema = { name: schema }
   }
 
+  invariant(schema, 'Schema cannot be undefined')
+
+  if (!schema.name) {
+    debug('Your service schema should define a name')
+  }
+
+  const { match = { nested: true } } = schema
+  const namespace = new Namespace({ match })
+
+  const options = {
+    name: schema.name
+  }
+
+  const service = new Service(namespace, options)
+
   // Catch unhandled errors
-  service.use(async (msg, next) => {
+  service.use(async (ctx, next) => {
     try {
-      return await next(msg)
+      return await next(ctx)
     } catch (e) {
       console.error(e)
     }
@@ -42,6 +42,8 @@ export function create(schema = {}) {
   if (typeof use === 'function') {
     const decorate = use
     use = [() => decorate(service)]
+  } else {
+    use = use.map(args => () => service.use.apply(service, args))
   }
 
   if (typeof actions === 'function') {

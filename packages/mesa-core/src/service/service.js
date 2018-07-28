@@ -2,7 +2,6 @@ import EventEmitter from 'eventemitter3'
 import uuidv1 from 'uuid/v1'
 import { compose } from '@mesa/component'
 import { Message } from './message'
-import { Container } from '../components'
 
 const context = {
   call(...args) {
@@ -16,10 +15,10 @@ const context = {
 export class Service extends EventEmitter {
   constructor(namespace, options) {
     super('service')
-    this.id = uuidv1()
+    this.namespace = namespace
     this.options = options
     this.name = options.name
-    this.namespace = namespace
+    this.id = uuidv1()
     this.context = Object.create(context)
   }
 
@@ -80,16 +79,14 @@ export class Service extends EventEmitter {
     return context
   }
 
-  getSpec() {
+  toComponent() {
     return this.namespace.router()
   }
 
   compose() {
     return compose(
-      this.getSpec(),
+      this.toComponent(),
       this
     )
   }
 }
-
-export default Service
