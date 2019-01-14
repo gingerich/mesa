@@ -20,7 +20,7 @@
     "koa-response-time": "^2.0.0",
     "methods": "^1.1.2",
     "node-fetch": "^2.1.1",
-    "path-to-regexp": "^2.2.1"
+    "path-to-regexp": "^3.0.0"
   },
   "scripts": {
     "prepublishOnly": "npm run build",
