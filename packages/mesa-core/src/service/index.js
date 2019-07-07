@@ -23,6 +23,7 @@ export function create(schema = {}) {
     match: {
       nested: true
     },
+    config: {},
     ...schema
   }
 

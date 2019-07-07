@@ -10,3 +10,5 @@ export default {
 
 import * as Serialize from './serializers'
 export { Serialize }
+
+export { Transport as BaseTransport } from './transport'
