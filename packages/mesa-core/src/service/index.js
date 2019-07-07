@@ -9,24 +9,25 @@ export function create(schema = {}) {
 
   if (typeof schema === 'function') {
     schema = schema(Context)
+    invariant(schema, 'Schema cannot be undefined')
   } else if (typeof schema === 'string') {
     schema = { name: schema }
   }
-
-  invariant(schema, 'Schema cannot be undefined')
 
   if (!schema.name) {
     debug('Your service schema should define a name')
   }
 
-  const { match = { nested: true } } = schema
-  const namespace = new Namespace({ match })
-
-  const options = {
-    name: schema.name
+  // Defaults
+  schema = {
+    match: {
+      nested: true
+    },
+    ...schema
   }
 
-  const service = new Service(namespace, options)
+  const namespace = new Namespace({ match: schema.match })
+  const service = new Service(namespace, schema)
 
   // Catch unhandled errors
   service.use(async (ctx, next) => {

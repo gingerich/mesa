@@ -15,4 +15,8 @@ export function ns(namespace, ...actions) {
     actions.reduce((ns, action) => action(ns), service.ns(namespace))
 }
 
+export function register(broker) {
+  return service => broker.use(service)
+}
+
 export default module.exports

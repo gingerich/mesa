@@ -1,16 +1,16 @@
 {
-  "name": "@mesa/transport",
+  "name": "@mesa/common",
   "version": "0.0.0",
-  "description": "Message transport layer for services",
+  "description": "Useful Mesa components",
   "main": "./lib/index.js",
-  "repository": "https://github.com/gingerich/mesa/packages/mesa-transport",
+  "repository": "https://github.com/gingerich/mesa/packages/mesa-common",
   "author": "Marlin Gingerich <marlin@gingerich.io>",
   "license": "MIT",
   "dependencies": {
-    "@mesa/core": "^0.0.0",
+    "@mesa/component": "^0.0.0",
+    "@mesa/util": "^0.0.0",
     "debug": "^3.1.0",
-    "invariant": "^2.2.3",
-    "mem": "^5.1.1"
+    "invariant": "^2.2.3"
   },
   "scripts": {
     "prepublishOnly": "npm run build",

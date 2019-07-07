@@ -9,12 +9,12 @@ export class Server {
 
     const upstream = []
 
-    if (options.deserialize) {
+    if (options.msgFromRequest) {
       const transform = ({ msg }, next) => next(options.msgFromRequest(msg))
       upstream.push(Mesa.use(transform))
     }
 
-    this.service = Mesa.createService({ upstream })
+    this.service = Mesa.createService({ name: 'server', upstream })
   }
 
   use(...middleware) {

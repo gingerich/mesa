@@ -10,7 +10,7 @@ export class Client extends Mesa.Component {
     const middleware = compose(this.config.subcomponents)
     const { url, ...fetchOpts } = this.config
 
-    return msg => {
+    return ({ msg }) => {
       const options = {
         ...fetchOpts,
         method: 'POST',

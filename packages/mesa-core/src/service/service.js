@@ -1,25 +1,22 @@
 import EventEmitter from 'eventemitter3'
 import uuidv1 from 'uuid/v1'
 import { compose } from '@mesa/component'
+import * as Context from './context'
 import { Message } from './message'
-
-const context = {
-  call(...args) {
-    return this.service.call(...args)
-  },
-  defer() {
-    return this.msg
-  }
-}
+import { Hooks } from './hook'
+import { Config } from '../components'
+import { Stack } from '../components/common'
 
 export class Service extends EventEmitter {
-  constructor(namespace, options) {
+  constructor(namespace, schema) {
     super('service')
-    this.namespace = namespace
-    this.options = options
-    this.name = options.name
     this.id = uuidv1()
-    this.context = Object.create(context)
+    this.namespace = namespace
+    this.schema = schema
+    this.name = schema.name
+    this.config = schema.config
+    this.hooks = new Hooks()
+    // this.context = Context.extend(schema.context)
   }
 
   /*
@@ -31,6 +28,12 @@ export class Service extends EventEmitter {
     return this
   }
 
+  stack(...middleware) {
+    const stack = Stack.spec().use(...middleware)
+    this.use(stack)
+    return stack
+  }
+
   plugin(plug, cb) {
     const result = plug(this)
     if (cb) {
@@ -38,6 +41,17 @@ export class Service extends EventEmitter {
     }
     return this
   }
+
+  // registerHook(name, component) {
+  //   this.hooks.register(name, componentn)
+  //   const { [name]: hook = [] } = this.hooks
+  //   hook.push(component)
+  // }
+
+  // getHook(name) {
+  //   const { [name]: hook = [] } = this.hooks
+  //   return compose(hook)
+  // }
 
   /*
   * Service methods
@@ -58,7 +72,8 @@ export class Service extends EventEmitter {
     }
 
     const message = Message.from(...args)
-    const ctx = this.createContext(message.value)
+
+    const ctx = this.createContext(message.payload)
 
     // Unhandled messages should return null
     return this.handler(ctx, () => null)
@@ -73,14 +88,12 @@ export class Service extends EventEmitter {
   */
 
   createContext(msg) {
-    const context = Object.create(this.context)
-    context.service = this
-    context.msg = msg
-    return context
+    return Context.create(this, msg, this.schema.context)
+    // return this.context.create(this, msg)
   }
 
   toComponent() {
-    return this.namespace.router()
+    return Config.spec(this.config).use(this.namespace.router())
   }
 
   compose() {

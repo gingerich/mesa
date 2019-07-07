@@ -6,7 +6,28 @@ export class Broker {
   constructor(options = {}) {
     this.options = options
     this.registry = new Map()
-    this.service = createService('broker')
+
+    // TODO: configure logging from options
+    this.logger = console
+
+    const self = this
+    this.service = createService(
+      {
+        name: 'broker',
+        context: {
+          broker: self,
+          get logger() {
+            return this.broker.logger
+          }
+        }
+      },
+      this.options
+    )
+  }
+
+  plugin(plugin) {
+    this.service.plugin(plugin)
+    return this
   }
 
   use(name, service) {
@@ -23,8 +44,12 @@ export class Broker {
     return this
   }
 
-  createService(options) {
-    const service = createService(options)
+  createService(schema, opts = {}) {
+    const options = { ...this.options, ...opts }
+    const service = createService(schema, options)
+
+    // Setup service here
+
     this.use(service)
     return service
   }
@@ -39,9 +64,5 @@ export class Broker {
 
   partial(...args) {
     return this.service.partial(...args)
-  }
-
-  plugin(name) {
-    return service => this.use(name || service.name, service)
   }
 }

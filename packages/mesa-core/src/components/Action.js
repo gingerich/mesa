@@ -1,6 +1,6 @@
 import { Component } from '@mesa/component'
 
-export class Handler extends Component {
+export class Action extends Component {
   compose(stack) {
     const middleware = stack()
 

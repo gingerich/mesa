@@ -1,31 +1,32 @@
 export class Message {
-  constructor(value) {
-    this.value = value
-  }
-}
-
-Message.parse = function parse(...args) {
-  let path = [],
-    i = 0
-  for (; i < args.length && typeof args[i] === 'string'; i++) {
-    path = path.concat(args[i].split('.'))
+  static from(...args) {
+    if (args[0] instanceof Message) {
+      return args[0]
+    }
+    return Message.parse(...args)
   }
 
-  const act = path.pop()
-  const parts = args.slice(i)
-  const payload = Object.assign({}, act && { act }, parts.pop())
+  static parse(...args) {
+    let path = [],
+      i = 0
+    for (; i < args.length && typeof args[i] === 'string'; i++) {
+      path = path.concat(args[i].split('.'))
+      // path.push(...args[i].split('.'))
+    }
 
-  const msg = path.reduceRight(
-    (body, ns) => ({ body, ns }),
-    parts.reduceRight((body, ns) => ({ ns, body }), payload)
-  )
+    const act = path.pop()
+    const parts = args.slice(i)
+    const msgBody = Object.assign({}, act && { act }, parts.pop())
 
-  return new Message(msg)
-}
+    const payload = path.reduceRight(
+      (body, ns) => ({ body, ns }),
+      parts.reduceRight((body, ns) => ({ ns, body }), msgBody)
+    )
 
-Message.from = function from(...args) {
-  if (args[0] instanceof Message) {
-    return args[0]
+    return new Message(payload)
   }
-  return Message.parse(...args)
+
+  constructor(payload) {
+    this.payload = payload
+  }
 }

@@ -1,5 +1,6 @@
 import { Server } from './Server'
 import { Client } from './Client'
+import { once } from 'events'
 
 export * from './Client'
 export * from './Server'
@@ -22,15 +23,22 @@ export function plugin(opts) {
   return service => listen(service, opts)
 }
 
-export function transport(opts) {
-  return ({ service, ingress, egress }) => {
-    const server = createServer(opts)
+export function transport(opts = {}) {
+  return connection => ({
+    ingress(service) {
+      const server = createServer(opts.server).use(service)
+      const tcp = server.listen(connection.port)
+      return once(tcp, 'listening')
+    },
 
-    server.use(service)
-
-    ingress.define((...args) => server.listen(...args))
-    egress.define((action, ...args) => service.action(action, client(...args)))
-  }
+    egress(service, action) {
+      if (!action) {
+        service.use(client(...connection.args))
+      } else {
+        service.action(action, client(...connection.args))
+      }
+    }
+  })
 }
 
 export default module.exports

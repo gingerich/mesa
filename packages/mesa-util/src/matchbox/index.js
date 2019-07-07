@@ -23,8 +23,7 @@ class Matchbox {
 
   define(pattern) {
     const ordered = getOrderedEntries({ ...pattern })
-    // const key = ordered.join('')
-    const key = JSON.stringify(ordered)
+    const key = JSON.stringify(pattern)
 
     if (!this.nodes.has(key)) {
       const node = new Node(ordered, pattern)
@@ -35,20 +34,21 @@ class Matchbox {
   }
 
   get(pattern) {
-    const ordered = getOrderedEntries(pattern)
-    const key = ordered.join('')
-
+    const key = JSON.stringify(pattern)
     return this.nodes.get(key)
   }
 
   remove(pattern) {
-    const ordered = getOrderedEntries(pattern)
-    const key = ordered.join('')
-
+    const key = JSON.stringify(pattern)
     return this.nodes.delete(key)
   }
 
   match(input, strict) {
+    const exactNode = this.get(input)
+    if (exactNode) {
+      return { node: exactNode }
+    }
+
     const ordered = getOrderedEntries({ ...input })
     const patterns = [...this.nodes.values()]
 

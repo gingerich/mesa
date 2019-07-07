@@ -1,7 +1,7 @@
 import { Client } from './Client'
 import { Server } from './Server'
 
-export function server(opts) {
+export function createServer(opts) {
   return new Server(opts)
 }
 

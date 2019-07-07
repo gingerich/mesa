@@ -1,4 +1,3 @@
-import koaCompose from 'koa-compose'
 import purpose from 'purposejs'
 import Component from './Component'
 import Spec from './Spec'
@@ -8,7 +7,13 @@ import Spec from './Spec'
 * Returns a middleware function composition representative of the given spec
 */
 export function compose(root, context) {
+  // const decorators = []
+  // const config = {}
   let handler
+
+  // const decorate = data => decorators.map(decorator => decorator(data))
+
+  // const configure = (...args) => Object.assign(Object.create(config), ...args)
 
   return function(data, next) {
     function defer(data) {
@@ -28,6 +33,10 @@ export function compose(root, context) {
             return Promise.resolve(spec(data, next))
           }
         }
+
+        // if (typeof spec.type.decorator === 'function') {
+        //   decorators.push(spec.type.decorator)
+        // }
 
         // Use the spec to construct a component instance
         const component = Spec.make(spec, context)
@@ -50,6 +59,10 @@ export function compose(root, context) {
         }
 
         stack.compose = composeSubcomponents
+
+        // stack.configure = function configure(...args) {
+        //   Object.assign(config, ...args)
+        // }
 
         // // Build a function that performs composition on the subcomponents
         // function middleware (subcomponents) {
@@ -82,6 +95,7 @@ export function compose(root, context) {
         * Reduce the result to its functional composition by making a recursive call
         */
         const fn = innerCompose(component.compose(stack), context)
+        // const fn = innerCompose(component.compose(stack()), context)
 
         // Trigger component lifecycle hook
         // component.componentDidMount(parent)
@@ -93,7 +107,14 @@ export function compose(root, context) {
       handler = innerCompose(root, context)
     }
 
+    // decorate(data)
+
     return handler(data, defer)
+  }
+
+  return {
+    execute,
+    configure
   }
 }
 

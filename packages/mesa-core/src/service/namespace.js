@@ -2,9 +2,7 @@ import memoize from 'fast-memoize'
 import { matchbox } from '@mesa/util'
 import { Service } from './service'
 import { Stack } from '../components/common'
-import { Container, Handler, Router } from '../components'
-
-export default options => new Namespace(options)
+import { Container, Action, Router } from '../components'
 
 const defaultOptions = {
   router: {
@@ -34,13 +32,13 @@ export class Namespace {
   }
 
   action(pattern, component) {
-    const handler = Handler.spec().use(component)
+    const action = Action.spec().use(component)
 
     if (typeof pattern === 'string') {
       pattern = { act: pattern }
     }
 
-    defineHandler(this.registry, pattern, handler)
+    defineHandler(this.registry, pattern, action)
 
     return this
   }
