@@ -12,11 +12,10 @@ export default class Connection {
       try {
         const url = new URL(connection)
         return {
-          protocol: url.protocol,
+          protocol: url.protocol.slice(0, -1), // trim trailing ':'
           username: url.username,
           password: url.password,
-          host: url.host,
-          hostname: url.hostname,
+          host: url.hostname,
           port: url.port,
           pathname: url.pathname,
           search: url.search,
@@ -24,6 +23,7 @@ export default class Connection {
           hash: url.hash,
           origin: url.origin,
           href: url.href,
+          url,
           ...options
         }
       } catch (e) {
