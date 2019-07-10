@@ -1,3 +1,6 @@
+import { create } from './service'
+export const Service = { create }
+
 export * from './singleton'
 
 export { Broker as ServiceBroker } from './service/broker'

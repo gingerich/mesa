@@ -1,4 +1,4 @@
-import Mesa from '@mesa/core'
+import { Service } from '@mesa/core'
 import Connector from './connector'
 import Interface from './interface'
 
@@ -14,7 +14,7 @@ class Ingress extends Interface {
 
   connector(resolve, transit) {
     return service => {
-      const s = Mesa.createService('123')
+      const s = Service.create()
         .use(this.parent.middleware)
         .use(this.middleware)
         .use(transit.ingress())

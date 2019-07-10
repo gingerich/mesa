@@ -1,18 +1,16 @@
-import Mesa from '@mesa/core'
+import { Service } from '@mesa/core'
 import Connector from './connector'
 import Interface from './interface'
 
-module.exports = class Egress extends Interface {
+class Egress extends Interface {
   connector(resolve, transit) {
     return service => {
-      const s = Mesa.createService('321')
+      const s = Service.create()
         .use(this.parent.middleware)
         .use(this.middleware)
         .use(transit.egress())
 
       // service.use(s)
-
-      // const transport = resolve(this.connection)
 
       // if (!this.actions.length) {
       //   return transport.egress(s)
@@ -26,3 +24,21 @@ module.exports = class Egress extends Interface {
     }
   }
 }
+
+Egress.Connector = class EgressConnector extends Connector {
+  connector(resolve) {
+    return service => {
+      const transport = resolve(this.connection)
+      if (!this.actions.length) {
+        return transport.egress(service)
+      }
+
+      const connections = this.actions.map(action =>
+        transport.egress(service, this.connection, action)
+      )
+      return Promise.all(connections)
+    }
+  }
+}
+
+module.exports = Egress
