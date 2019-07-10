@@ -9,36 +9,44 @@ export function createServer(opts) {
   return new Server(opts)
 }
 
-export function listen(component, ...args) {
-  return createServer()
-    .use(component)
-    .listen(...args)
+export function listen(server, component, ...listenArgs) {
+  return server.plugin(service => service.use(component)).listen(...listenArgs)
 }
 
 export function client(config) {
   return Client.spec(config)
 }
 
-export function plugin(opts) {
-  return service => listen(service, opts)
+export function plugin(opts = {}) {
+  return service => {
+    service.on('connect', () => {
+      const server = listen(createServer(opts.server), service, opts.connection)
+      once(server, 'listening').then(() =>
+        service.emit('tcp:connected', server)
+      )
+    })
+  }
 }
 
 export function transport(opts = {}) {
-  return connection => ({
-    ingress(service) {
-      const server = createServer(opts.server).use(service)
-      const tcp = server.listen(connection.port)
-      return once(tcp, 'listening')
-    },
+  const defaultConnection = {
+    port: 3000
+  }
 
-    egress(service, action) {
-      if (!action) {
-        service.use(client(...connection.args))
-      } else {
-        service.action(action, client(...connection.args))
+  return connection => {
+    connection = { ...defaultConnection, ...connection }
+
+    return {
+      ingress(service) {
+        const server = listen(createServer(opts.server), service, connection)
+        return once(server, 'listening').then(() => connection)
+      },
+
+      egress(service, action) {
+        service.action(action, client(connection))
       }
     }
-  })
+  }
 }
 
 export default module.exports

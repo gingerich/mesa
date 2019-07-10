@@ -17,13 +17,8 @@ export class Server {
     this.service = Mesa.createService({ name: 'server', upstream })
   }
 
-  use(...middleware) {
-    this.service.use(...middleware)
-    return this
-  }
-
-  action(pattern, handler) {
-    this.service.action(pattern, handler)
+  plugin(plug) {
+    plug(this.service)
     return this
   }
 
