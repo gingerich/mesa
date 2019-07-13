@@ -21,16 +21,21 @@ Mesa.createService()
 
 ## Transport Layer
 
-```js
-const transports = Transport.createLayer().use('tcp', TCP.transport())
+Plug-and-play transport layer keeps your service transport independent.
 
-const transportPlugin = transports.makePlugin()
+```js
+const layer = Transport.createLayer()
+  .protocol('tcp', TCP.transport())
+  .use(Serializers.JSON())
+
+const transport = layer.transport(connect => {
+  connect.ingress.at('tcp://localhost:3000')
+})
 
 Mesa.createService()
-  .plugin(transportPlugin())
-  .action({ cmd: 'greet' }, Greetings.spec({ greeting: 'Hello' }))
+  .plugin(transport.plugin())
+  .action('greet', Greetings.spec({ greeting: 'Hello' }))
 
-transportPlugin.start(({ tcp }) => {
-  tcp.listen(3000)
-})
+transport.connect()
+  .then(() => console.log('connected!'))
 ```
