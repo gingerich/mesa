@@ -4,13 +4,16 @@ import { once, EventEmitter } from 'events'
 import { Transit } from './transit'
 
 export default class Transporter extends EventEmitter {
-  static getResolver(layer) {
+  static getResolver(layer, transit) {
     return connection => {
       const transport = layer.transports[connection.protocol]
 
       invariant(transport, `No protocol definition for ${connection.protocol}`)
 
-      return transport(connection)
+      // immutability of connection object required for effective memoization (may need to deep copy instead?)
+      const conn = { ...connection }
+
+      return transport(conn, transit)
     }
   }
 
@@ -22,9 +25,9 @@ export default class Transporter extends EventEmitter {
 
   plugin() {
     return service => {
-      // memoize resolver so same transport instance per unique connection
-      const resolve = memoize(Transporter.getResolver(this.layer))
+      // memoize resolver to use same transport instance per unique connection
       const transit = new Transit(this, service)
+      const resolve = memoize(Transporter.getResolver(this.layer, transit))
       const connect = this.interface.connector(resolve, transit)
 
       this.once('connect', options => {
@@ -34,8 +37,8 @@ export default class Transporter extends EventEmitter {
         )
 
         Promise.resolve(connected).then(
-          results => this.emit('connected', results),
-          err => this.emit('error', err)
+          connections => this.emit('connected', connections),
+          error => this.emit('error', error)
         )
       })
     }
