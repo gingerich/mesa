@@ -3,40 +3,56 @@ import Connector from './connector'
 import Interface from './interface'
 
 class Egress extends Interface {
+  at(protocol, ...args) {
+    super.at(protocol, ...args)
+    return this
+  }
+
+  action(action) {
+    this._action = action
+    return this
+  }
+
+  resolve(connection) {
+    return new Egress.Connector(this, connection)
+  }
+
   connector(resolve, transit) {
     return service => {
-      const s = Service.create()
+      const egressService = Service.create()
         .use(this.parent.middleware)
         .use(this.middleware)
         .use(transit.egress())
 
-      // service.use(s)
+      service.use(async (ctx, next) => {
+        const msg = await next(ctx) // let local service try to handle it??
+        if (msg) return msg // TODO check if handled
+        return egressService.call(ctx.msg)
+      })
 
       // if (!this.actions.length) {
-      //   return transport.egress(s)
+      //   return transport.egress(egressService)
       // }
 
       // const connections = this.actions.map(action =>
-      //   transport.egress(s, this.connection, action)
+      //   transport.egress(egressService, this.connection, action)
       // )
 
-      return super.connector(resolve, transit)(s)
+      return super.connector(resolve, transit)(egressService)
     }
   }
 }
 
 Egress.Connector = class EgressConnector extends Connector {
+  constructor(egress, connection) {
+    super(connection)
+    this.egress = egress
+  }
+
   connector(resolve) {
     return service => {
       const transport = resolve(this.connection)
-      if (!this.actions.length) {
-        return transport.egress(service)
-      }
-
-      const connections = this.actions.map(action =>
-        transport.egress(service, this.connection, action)
-      )
-      return Promise.all(connections)
+      return transport.egress(service, this.egress._action)
     }
   }
 }
