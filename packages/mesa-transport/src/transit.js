@@ -1,8 +1,9 @@
 import Packet from './packet'
 
 export class Transit {
-  constructor(transporter) {
+  constructor(transporter, service) {
     this.transporter = transporter
+    this.service = service
     this.activeRequests = new Map()
   }
 
@@ -26,7 +27,7 @@ export class Transit {
   egress() {
     return (ctx, next) => {
       const p = this.makeRequest(ctx)
-      return next(ctx).then(p)
+      return next(ctx).then(() => p)
     }
   }
 
@@ -37,6 +38,7 @@ export class Transit {
         resolve,
         reject
       }
+      // ctx.request = request
       this.activeRequests.set(ctx.id, request)
     })
   }
@@ -51,7 +53,7 @@ export class Transit {
     this.activeRequests.delete(packet.id)
 
     // merge packet context into request context
-    req.ctx.msg = packet.data
+    // req.ctx.msg = packet.data ??
     // etc
 
     if (!packet.success) {
@@ -59,11 +61,20 @@ export class Transit {
       return
     }
 
-    req.resolve(req.ctx)
+    req.resolve(packet.data)
   }
 
   handleEvent(ctx, next) {
     // TODO?
     return next(ctx)
   }
+
+  // resolveRequest(ctx) {
+  //   const req = this.activeRequests.get(ctx.id)
+  //   if (!req) return
+
+  //   this.activeRequests.delete(ctx.id)
+
+  //   req.
+  // }
 }
