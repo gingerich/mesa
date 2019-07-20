@@ -14,7 +14,7 @@ export class Namespace {
   constructor(options) {
     this.options = { ...defaultOptions, ...options }
     this.registry = matchbox(options.match)
-    this.container = Container.spec({ namespace: this })
+    this.container = Container.spec()
   }
 
   use(ns, component) {
@@ -32,13 +32,11 @@ export class Namespace {
   }
 
   action(pattern, component) {
-    const action = Action.spec().use(component)
-
     if (typeof pattern === 'string') {
       pattern = { act: pattern }
     }
 
-    defineHandler(this.registry, pattern, action)
+    defineHandler(this.registry, pattern, component)
 
     return this
   }
@@ -80,7 +78,7 @@ function defineHandler(registry, pattern, handler) {
     node.handlers = []
   }
 
-  node.handlers.unshift(handler)
+  node.handlers.push(handler)
 
   return node
 }

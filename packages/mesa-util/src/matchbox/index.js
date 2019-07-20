@@ -1,12 +1,9 @@
 import matchFactory from './match'
 
+const compareFn = (a, b) => a[0] > b[0]
+
 function getOrderedEntries(obj) {
-  return Object.keys(obj)
-    .sort()
-    .reduce((entries, key) => {
-      entries.push([key, obj[key]])
-      return entries
-    }, [])
+  return Object.entries(obj).sort(compareFn)
 }
 
 class Node {
@@ -22,7 +19,8 @@ class Matchbox {
   }
 
   define(pattern) {
-    const ordered = getOrderedEntries({ ...pattern })
+    const obj = { ...pattern }
+    const ordered = getOrderedEntries(obj)
     const key = JSON.stringify(pattern)
 
     if (!this.nodes.has(key)) {
@@ -44,20 +42,23 @@ class Matchbox {
   }
 
   match(input, strict) {
-    const exactNode = this.get(input)
-    if (exactNode) {
-      return { node: exactNode }
-    }
+    // const exactNode = this.get(input)
+    // if (exactNode) {
+    //   return {
+    //     nodes: [exactNode],
+    //     maximal: { node: exactNode, captured: exactNode }
+    //   }
+    // }
 
     const ordered = getOrderedEntries({ ...input })
     const patterns = [...this.nodes.values()]
 
     if (!patterns.length) {
-      return
+      return null
     }
 
-    const node = this.options.match(patterns, ordered, strict)
-    return node
+    const matched = this.options.match(patterns, ordered, strict)
+    return matched
 
     if (node) {
       return { node }
