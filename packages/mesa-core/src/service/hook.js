@@ -9,7 +9,10 @@ export class Hooks {
   }
 
   register(name, component) {
-    const { [name]: hook = [] } = this.hooks
+    const { [name]: hook } = this.hooks
+    if (!hook) {
+      hook = this.hooks[name] = []
+    }
     hook.push(component)
   }
 
