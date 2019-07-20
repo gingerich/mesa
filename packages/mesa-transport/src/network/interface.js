@@ -52,11 +52,14 @@ export default class Interface extends Connector {
   }
 
   resolve(connection) {
-    return new Interface(this, connection)
+    const iface = new Interface(this, connection)
+    iface.ingress.at(connection)
+    iface.egress.at(connection)
+    return iface
   }
 
-  at(...args) {
-    const connection = Connection.resolve(...args)
+  at(protocol, ...args) {
+    const connection = Connection.resolve(protocol, ...args)
     connection.args = args
     const iface = this.resolve(connection)
     this.add(iface)

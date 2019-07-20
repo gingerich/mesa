@@ -3,8 +3,8 @@ import Connector from './connector'
 import Interface from './interface'
 
 class Ingress extends Interface {
-  at(...args) {
-    super.at(...args)
+  at(protocol, ...args) {
+    super.at(protocol, ...args)
     return this
   }
 
@@ -14,13 +14,13 @@ class Ingress extends Interface {
 
   connector(resolve, transit) {
     return service => {
-      const s = Service.create()
+      const ingressService = Service.create()
         .use(this.parent.middleware)
         .use(this.middleware)
         .use(transit.ingress())
         .use(ctx => service.call(ctx.msg))
 
-      return super.connector(resolve, transit)(s)
+      return super.connector(resolve, transit)(ingressService)
     }
   }
 }
