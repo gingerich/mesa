@@ -38,7 +38,7 @@ export class Component {
   }
 
   constructor(config, context) {
-    this.config = Object.assign(get.bind(null, config), config)
+    this.config = config
     this.context = context
   }
 
