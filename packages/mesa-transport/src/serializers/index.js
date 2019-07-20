@@ -16,7 +16,7 @@ export function ingress(serializer) {
 
 export function egress(serializer) {
   return async (ctx, next) => {
-    ctx.msg = serializer.serialize(ctx.msg)
+    ctx.payload = serializer.serialize(ctx.msg)
     const data = await next(ctx)
     return serializer.deserialize(data)
   }
