@@ -25,7 +25,7 @@ export default class Layer {
     return this
   }
 
-  transport(init) {
+  transporter(init) {
     const connect = new Network.Interface()
     const transporter = new Transporter(this, connect)
 

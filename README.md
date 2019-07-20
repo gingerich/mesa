@@ -28,14 +28,13 @@ const layer = Transport.createLayer()
   .protocol('tcp', TCP.transport())
   .use(Serializers.JSON())
 
-const transport = layer.transport(connect => {
+const transporter = layer.transporter(connect => {
   connect.ingress.at('tcp://localhost:3000')
 })
 
 Mesa.createService()
-  .plugin(transport.plugin())
+  .plugin(transporter.plugin())
   .action('greet', Greetings.spec({ greeting: 'Hello' }))
 
-transport.connect()
-  .then(() => console.log('connected!'))
+transporter.connect().then(() => console.log('connected!'))
 ```
