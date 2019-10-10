@@ -1,7 +1,7 @@
 import memoize from 'fast-memoize'
 import { Component } from '@mesa/component'
 import { Stack } from './common'
-import { Action } from './action'
+import { Actions } from './Actions'
 
 export class Router extends Component {
   static destructure(key) {
@@ -17,12 +17,10 @@ export class Router extends Component {
     const makeHandler = memoize(nodes => {
       // const balancer = Stack.spec().use(handlers) // TODO balancing
       // return stack.compose([balancer])
-      const component = nodes.reduce(
-        (result, node) =>
-          result.use(Action.spec().use(Balancer.spec().use(node.handlers))),
-        Stack.spec()
+      const components = nodes.map(node =>
+        Actions.spec().use(Balancer.spec().use(node.handlers))
       )
-      return stack.compose([component])
+      return stack.compose(components)
     })
 
     return (ctx, next) => {
@@ -42,7 +40,7 @@ export class Router extends Component {
 
       const handler = makeHandler(match.nodes)
 
-      return handler(ctx, ({ msg }) => msg)
+      return handler(ctx) //, ({ msg }) => msg)
     }
   }
 }

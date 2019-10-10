@@ -26,8 +26,9 @@ export class Server {
     return net
       .createServer(sock => {
         sock.on('data', async data => {
-          const response = await this.service.call({ data })
-          sock.write(response)
+          // parse data into type,payload
+          const packet = await this.service.call({ data, type: 'REQUEST' })
+          sock.write(packet.payload)
         })
 
         sock.on('end', () => debug('connection ended'))

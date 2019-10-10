@@ -16,11 +16,6 @@ export default class Interface extends Connector {
     this.middleware = []
   }
 
-  use(...middleware) {
-    this.middleware = this.middleware.concat(...middleware)
-    return this
-  }
-
   get ingress() {
     if (!this._ingress) {
       this._ingress = new Interface.Ingress(this)
@@ -39,6 +34,11 @@ export default class Interface extends Connector {
     return this._egress
   }
 
+  use(...middleware) {
+    this.middleware = this.middleware.concat(...middleware)
+    return this
+  }
+
   add(connector) {
     if (typeof connector === 'function') {
       connector = connector(this)
@@ -53,8 +53,10 @@ export default class Interface extends Connector {
 
   resolve(connection) {
     const iface = new Interface(this, connection)
-    iface.ingress.at(connection)
+    // Order matters here
+    // egress should connect first to ensure service.use() called before ingress can service.call()
     iface.egress.at(connection)
+    iface.ingress.at(connection)
     return iface
   }
 

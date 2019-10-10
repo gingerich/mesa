@@ -1,25 +1,44 @@
+const PACKET_UNKNOWN = 'UNKNOWN'
+const PACKET_RESPONSE = 'RESPONSE'
+const PACKET_REQUEST = 'REQUEST'
+const PACKET_EVENT = 'EVENT'
+
 export default class Packet {
-  static get PACKET_TYPE_RESPONSE() {
-    return 'PACKET_TYPE_RESPONSE'
-  }
-
-  static get PACKET_TYPE_REQUEST() {
-    return 'PACKET_TYPE_REQUEST'
-  }
-
-  static get PACKET_TYPE_EVENT() {
-    return 'PACKET_TYPE_EVENT'
-  }
-
   static isResponse(packet) {
-    return Packet.PACKET_TYPE_RESPONSE === packet.type
+    return !!packet && PACKET_RESPONSE === packet.type
   }
 
   static isRequest(packet) {
-    return Packet.PACKET_TYPE_REQUEST === packet.type
+    return !!packet && PACKET_REQUEST === packet.type
   }
 
   static isEvent(packet) {
-    return Packet.PACKET_TYPE_EVENT === packet.type
+    return !!packet && PACKET_EVENT === packet.type
+  }
+
+  static create(type = PACKET_UNKNOWN, payload = {}, target = null) {
+    return new Packet(type, payload, target)
+  }
+
+  constructor(type, payload, target) {
+    this.type = type
+    this.payload = payload
+    this.target = target
   }
 }
+
+// Packet.Response = class Response extends Packet {
+//   static TYPE = PACKET_RESPONSE
+
+//   constructor(target, payload) {
+//     super(Response.PACKET_TYPE, payload)
+//     this.target = target
+//   }
+// }
+
+Object.assign(Packet, {
+  PACKET_UNKNOWN,
+  PACKET_REQUEST,
+  PACKET_RESPONSE,
+  PACKET_EVENT
+})

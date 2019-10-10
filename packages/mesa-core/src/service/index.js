@@ -1,6 +1,7 @@
 import invariant from 'invariant'
 import { Namespace } from './namespace'
 import { Service } from './service'
+import { fallback } from '../middleware'
 
 const debug = require('debug')('mesa:service')
 
@@ -30,14 +31,21 @@ export function create(schema = {}) {
   const namespace = new Namespace({ match: schema.match })
   const service = new Service(namespace, schema)
 
-  // Catch unhandled errors
-  service.use(async (ctx, next) => {
-    try {
-      return await next(ctx)
-    } catch (e) {
-      console.error(e)
-    }
-  })
+  // // Catch unhandled errors
+  // service.use(async (ctx, next) => {
+  //   try {
+  //     return await next(ctx)
+  //   } catch (e) {
+  //     console.error(e)
+  //   }
+  // })
+  service.use(
+    fallback((ctx, error) => {
+      return typeof ctx.options.fallback === 'function'
+        ? ctx.options.fallback(ctx, error)
+        : ctx.options.fallback
+    })
+  )
 
   let { use = [], actions = [] } = schema
 

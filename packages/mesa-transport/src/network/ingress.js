@@ -1,6 +1,7 @@
 import { Service } from '@mesa/core'
 import Connector from './connector'
 import Interface from './interface'
+import Packet from '../packet'
 
 class Ingress extends Interface {
   at(protocol, ...args) {
@@ -18,9 +19,27 @@ class Ingress extends Interface {
         .use(this.parent.middleware)
         .use(this.middleware)
         .use(transit.ingress())
-        .use(ctx => service.call(ctx.msg))
 
-      return super.connector(resolve, transit)(ingressService)
+      const connected = super.connector(resolve, transit)(ingressService)
+
+      ingressService.use(ctx => {
+        const { payload } = ctx.packet
+
+        if (Packet.isRequest(ctx.packet)) {
+          return service.call(payload.data)
+        }
+
+        if (Packet.isEvent(ctx.packet)) {
+          return service.emit(payload.data)
+        }
+
+        // TODO: throw error ??
+        throw new Error(
+          `Ingress encountered unexpected packet type ${ctx.packet.type}`
+        )
+      })
+
+      return connected
     }
   }
 }

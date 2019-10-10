@@ -5,7 +5,7 @@ const { transport: mqtt } = require('../mesa-mqtt/lib')
 
 const layer = Transport.createLayer()
   .protocol('tcp', tcp())
-  .protocol('mqtt', mqtt())
+  // .protocol('mqtt', mqtt())
   .use(Transport.Serialize.JSON())
 
 const transport = layer.transporter(connect => {
@@ -17,7 +17,13 @@ const transport = layer.transporter(connect => {
 const service = Mesa.createService('test').plugin(transport.plugin())
 service.action(
   { test: 123 },
-  async ctx => `remote: ${await ctx.call({ test: true })}`
+  async ctx =>
+    `remote: ${await ctx.call({ test: true }, null, { fallback: 'welp!' })}`,
+  {
+    fallback(ctx) {
+      return 'this is fun!'
+    }
+  }
 )
 service.action(
   { test: 123, foo: 'hello' },
@@ -31,18 +37,33 @@ Mesa.createService('other')
   .plugin(otherTransport.plugin())
   .action({ test: true }, ctx => `remote RESPONSE!!`)
 
-otherTransport.connect().then(() => console.log('other service connected!'))
+const p = otherTransport
+  .connect()
+  .then(() => console.log('other service connected!'))
 
 // hmm.. match algorithm should return EVERY action that matches ordered by specificity, same pattern in the order they were added
 
 transport.on('error', err => console.error('bad', err))
 transport.on('listening', r => console.log('listening', r))
 
-transport.connect().then(() => {
-  console.log('connected!')
-})
+transport
+  .connect()
+  .then(() => p)
+  .then(() => {
+    console.log('connected!')
+  })
+  .then(() => {
+    service.call({ test: 123 }).then(
+      result => {
+        console.log('RESULT', result)
+      },
+      err => console.error('bad', err)
+    )
+  })
 
-service
-  // .call({ test: 123, foo: 'hello', bar: 'wut' })
-  .call({ test: 123, foo: 'hello' })
-  .then(r => console.log('result', r))
+// service.call({ test: 123 }).then(
+//   result => {
+//     console.log('RESULT', result)
+//   },
+//   err => console.error('bad', err)
+// )

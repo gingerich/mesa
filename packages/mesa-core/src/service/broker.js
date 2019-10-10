@@ -1,10 +1,14 @@
 import invariant from 'invariant'
 import { create as createService } from '.'
 import { Service } from './service'
+import { getNodeID } from '../utils'
 
 export class Broker {
   constructor(options = {}) {
     this.options = options
+    this.nodeID = this.options.nodeID || getNodeID()
+
+    // service registry
     this.registry = new Map()
 
     // TODO: configure logging from options
@@ -46,6 +50,7 @@ export class Broker {
 
   createService(schema, opts = {}) {
     const options = { ...this.options, ...opts }
+    // schema.broker = this
     const service = createService(schema, options)
 
     // Setup service here
@@ -60,9 +65,5 @@ export class Broker {
 
   call(...args) {
     return this.service.call(...args)
-  }
-
-  partial(...args) {
-    return this.service.partial(...args)
   }
 }

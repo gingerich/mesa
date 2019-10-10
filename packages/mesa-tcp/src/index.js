@@ -1,6 +1,7 @@
+import { once } from 'events'
+import { Stack } from '@mesa/core'
 import { Server } from './Server'
 import { Client } from './Client'
-import { once } from 'events'
 
 export * from './Client'
 export * from './Server'
@@ -33,19 +34,53 @@ export function transport(opts = {}) {
     port: 3000
   }
 
-  return connection => {
+  return (connection, transit) => {
     connection = { ...defaultConnection, ...connection }
 
-    return {
+    return Object.create({
       ingress(service) {
         const server = listen(createServer(opts.server), service, connection)
+        server.on('listening', () =>
+          transit.transporter.emit('listening', 'tcp')
+        )
         return once(server, 'listening').then(() => connection)
       },
 
       egress(service, action) {
-        service.action(action, client(connection))
+        service.action(
+          action,
+          Stack.spec()
+            .use((ctx, next) => {
+              return next(ctx).then(result => {
+                // const payload = {
+                //   data: result,
+                //   id: ctx.id,
+                //   success: true
+                // }
+                const pkt = ctx.deserialize(result, 'RESPONSE')
+                transit.handleResponse(pkt)
+              })
+            })
+            .use(client(connection))
+        )
+      },
+
+      get writer() {
+        if (!this._writer) {
+          // TODO
+        }
+
+        return this._writer
+      },
+
+      get reader() {
+        if (!this._reader) {
+          // TODO
+        }
+
+        return this._reader
       }
-    }
+    })
   }
 }
 

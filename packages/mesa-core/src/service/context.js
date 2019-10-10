@@ -1,8 +1,13 @@
 import { uuid } from '../utils'
 
 const baseContext = {
-  call(...args) {
-    return this.service.call(...args)
+  // cmd: 'REQUEST',
+  call(action, msg, opts = {}) {
+    opts.cmd = 'REQUEST'
+    return this.service.call(action, msg, opts)
+  },
+  emit(...args) {
+    return this.service.emit(...args)
   },
   defer() {
     return this.msg
@@ -13,6 +18,9 @@ const baseContext = {
   configure(...args) {
     Object.assign(this.config, ...args)
   },
+  // get cmd() {
+  //   return this.options.cmd
+  // },
   get id() {
     if (!this._id) {
       this._id = uuid()
@@ -24,11 +32,14 @@ const baseContext = {
   }
 }
 
-export const create = (service, msg, extendedContext) => {
+export const create = (service, msg, extendedContext, opts) => {
   const context = Object.create({ ...baseContext, ...extendedContext })
   context.config = Object.create(service.config)
   context.service = service
   context.msg = msg
+  context.cmd = opts.cmd
+  context.meta = opts.meta
+  context.options = opts
   return context
 }
 

@@ -1,3 +1,5 @@
+import os from 'os'
+
 const lut = []
 for (let i = 0; i < 256; i++) {
   lut[i] = (i < 16 ? '0' : '') + i.toString(16)
@@ -34,3 +36,7 @@ function e7() {
 }
 
 export { e7 as uuid }
+
+export function getNodeID() {
+  return `${os.hostname()}.${process.pid}`
+}

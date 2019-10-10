@@ -9,15 +9,25 @@ const ops = broker.createService({
     ['add', ({ msg: { a, b } }) => a + b],
     ['sub', ({ msg: { a, b } }) => a - b]
   ]
+  // actions: {
+  //   add: {
+  //     match: { act: 'add', test: 1 },
+  //     fallback: 'foo',
+  //     handler() {}
+  //   }, // .action({ act: 'add', test: 1 }, handler, { fallback })
+  //   sub: () => {}, // .action('sub', () => {})
+  //   mult: Multiply.spec() // .action('mult', Multiply.spec())
+  // }
 })
 
 broker.createService('math').use('ops', ops) // Problem: ops is "double used"
 
-const add = broker.partial('math.ops.add')
-const sub = broker.partial('math.ops.sub')
+const add = broker.call.bind(broker, 'math.ops.add')
+const sub = broker.call.bind(broker, 'math.ops.sub')
 
-function fn() {
-  return sub({ a: -4, b: 2 }).then(b => add({ a: 8, b }))
+async function fn() {
+  aMinusB = await sub({ a: -4, b: 2 })
+  return add({ a: 8, b: aMinusB })
 }
 
 let i = 1000
@@ -52,6 +62,8 @@ test
   })
   .action('bar', ({ msg }) => `Hello ${msg.test}`)
   .action('foo', Test.spec({ a: 1 }))
+// .event('user.created', UserCreated.spec())
+// .event('.node.*', () => {})
 
 test.call('test.foo').then(console.log.bind(console))
 

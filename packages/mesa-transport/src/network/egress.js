@@ -1,11 +1,11 @@
-import { Service } from '@mesa/core'
+import { Service, Message, Middleware, Errors } from '@mesa/core'
 import Connector from './connector'
 import Interface from './interface'
 
 class Egress extends Interface {
   at(protocol, ...args) {
     super.at(protocol, ...args)
-    return this
+    return this // ?
   }
 
   action(action) {
@@ -24,19 +24,35 @@ class Egress extends Interface {
         .use(this.middleware)
         .use(transit.egress())
 
-      service.use(async (ctx, next) => {
-        const msg = await next(ctx) // let local service try to handle it??
-        if (msg) return msg // TODO check if handled
-        return egressService.call(ctx.msg)
+      const egressFallback = Middleware.fallback((ctx, err) => {
+        if (err instanceof Errors.UnhandledMessageError) {
+          console.log('call egress', ctx.cmd)
+          return egressService.call(ctx.msg, null, { ctx })
+        }
+
+        throw err
       })
 
-      // if (!this.actions.length) {
-      //   return transport.egress(egressService)
-      // }
+      service.use(egressFallback)
 
-      // const connections = this.actions.map(action =>
-      //   transport.egress(egressService, this.connection, action)
-      // )
+      // service.use(async (ctx, next) => {
+      //   // Attempt to handle message locally first
+      //   return next(ctx).catch(error => {
+      //     if (error instanceof Error) {
+      //       return egressService.call(null, { ctx })
+      //     }
+
+      //     return Promise.reject(error)
+      //   })
+
+      //   const result = await next(ctx)
+      //   console.log('MSG', result)
+      //   if (result !== Message.UNHANDLED) {
+      //     return result
+      //   }
+      //   console.log('egress', ctx.msg)
+      //   return egressService.call(null, { ctx })
+      // })
 
       return super.connector(resolve, transit)(egressService)
     }
