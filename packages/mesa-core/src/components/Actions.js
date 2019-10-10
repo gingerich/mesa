@@ -21,23 +21,5 @@ Actions.Handler = class ActionHandler extends Component {
     const fallbackMiddleware = fallback(this.config.fallback)
 
     return ctx => fallbackMiddleware(ctx, handler)
-
-    // return ctx => {
-    //   return handler(ctx).catch(err => {
-    //     const { fallbackHandler } = this.config
-
-    //     if (!fallbackHandler) {
-    //       throw err
-    //     }
-
-    //     // TODO: logging
-
-    //     if (typeof fallbackHandler !== 'function') {
-    //       return Promise.resolve(fallbackHandler)
-    //     }
-
-    //     return fallbackHandler(ctx)
-    //   })
-    // }
   }
 }
