@@ -46,13 +46,7 @@ export class Transit {
       }
 
       return next(ctx).then(
-        result => {
-          if (Message.isUnhandled(result)) {
-            return result
-          }
-
-          return pendingResult
-        },
+        () => pendingResult,
         error => {
           this.abortRequest(ctx)
           throw error
