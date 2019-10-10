@@ -33,7 +33,6 @@ class Ingress extends Interface {
           return service.emit(payload.data)
         }
 
-        // TODO: throw error ??
         throw new Error(
           `Ingress encountered unexpected packet type ${ctx.packet.type}`
         )

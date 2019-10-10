@@ -20,13 +20,12 @@ class Egress extends Interface {
   connector(resolve, transit) {
     return service => {
       const egressService = Service.create()
+        .use(transit.egress())
         .use(this.parent.middleware)
         .use(this.middleware)
-        .use(transit.egress())
 
       const egressFallback = Middleware.fallback((ctx, err) => {
         if (err instanceof Errors.UnhandledMessageError) {
-          console.log('call egress', ctx.cmd)
           return egressService.call(ctx.msg, null, { ctx })
         }
 
@@ -34,25 +33,6 @@ class Egress extends Interface {
       })
 
       service.use(egressFallback)
-
-      // service.use(async (ctx, next) => {
-      //   // Attempt to handle message locally first
-      //   return next(ctx).catch(error => {
-      //     if (error instanceof Error) {
-      //       return egressService.call(null, { ctx })
-      //     }
-
-      //     return Promise.reject(error)
-      //   })
-
-      //   const result = await next(ctx)
-      //   console.log('MSG', result)
-      //   if (result !== Message.UNHANDLED) {
-      //     return result
-      //   }
-      //   console.log('egress', ctx.msg)
-      //   return egressService.call(null, { ctx })
-      // })
 
       return super.connector(resolve, transit)(egressService)
     }

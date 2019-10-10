@@ -52,11 +52,6 @@ export function transport(opts = {}) {
           Stack.spec()
             .use((ctx, next) => {
               return next(ctx).then(result => {
-                // const payload = {
-                //   data: result,
-                //   id: ctx.id,
-                //   success: true
-                // }
                 const pkt = ctx.deserialize(result, 'RESPONSE')
                 transit.handleResponse(pkt)
               })

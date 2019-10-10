@@ -8,7 +8,7 @@ import { UnhandledMessageError } from './errors'
 import { Config } from '../components'
 import { Stack } from '../components/common'
 
-const defaultHandler = () => UnhandledMessageError.reject() //  Message.UNHANDLED
+const defaultHandler = () => UnhandledMessageError.reject()
 
 export class Service extends EventEmitter {
   constructor(namespace, schema) {
@@ -76,10 +76,6 @@ export class Service extends EventEmitter {
     return this._handler(ctx, next)
   }
 
-  // call('foo.test', payload, { fallback })
-  // call({ a: 1 }, { fallback })
-  // call('foo.test', payload)
-  // call({ a: 1 })
   call(action, msg, opts) {
     const parts = [action]
 
@@ -97,20 +93,12 @@ export class Service extends EventEmitter {
     const ctx = this.createContext(message, opts)
 
     return this.handle(ctx, defaultHandler) // defaultHandler could be optional param in opts
-
-    // const callback = args[args.length - 1]
-    // if (typeof callback === 'function') {
-    //   result.then(data => callback(ctx, data))
-    // }
-
-    // return result
   }
 
   emit(...args) {
     const message = Message.from(...args)
 
-    const ctx = this.createContext(message)
-    ctx.cmd = 'event'
+    const ctx = this.createContext(message, { cmd: 'event' })
 
     return this.handle(ctx)
   }

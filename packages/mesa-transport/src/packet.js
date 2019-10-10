@@ -27,15 +27,6 @@ export default class Packet {
   }
 }
 
-// Packet.Response = class Response extends Packet {
-//   static TYPE = PACKET_RESPONSE
-
-//   constructor(target, payload) {
-//     super(Response.PACKET_TYPE, payload)
-//     this.target = target
-//   }
-// }
-
 Object.assign(Packet, {
   PACKET_UNKNOWN,
   PACKET_REQUEST,

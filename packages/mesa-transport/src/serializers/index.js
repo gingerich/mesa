@@ -8,86 +8,23 @@ export const Serializers = {
 export const JSON = opts => plugin(new Serializers.JSON(opts))
 // export const ProtoBuf = opts => plugin(new Serializers.ProtoBuf(opts))
 
-// export function ingress(serializer) {
-//   return async (ctx, next) => {
-//     const { data, type } = ctx.msg
-//     const payload = serializer.deserialize(data, type)
-//     ctx.packet = Packet.create(type, payload)
-
-//     const result = await next(ctx)
-
-//     if (!result) {
-//       return Packet.create() // empty packet
-//     }
-
-//     const type = Packet.PACKET_TYPE_RESPONSE
-//     const data = serializer.serialize(result, type)
-//     const payload = {
-//       id: ctx.id,
-//       data
-//     }
-//     return Packet.create(type, payload, ctx.packet.sender)
-//   }
-// }
-
-// export function egress(serializer) {
-//   return async (ctx, next) => {
-//     // const { payload } = ctx.packet
-//     const payload = {
-//       id: ctx.id,
-//       data: ctx.msg,
-//       sender: ctx.nodeID // ?
-//     }
-//     const data = serializer.serialize(payload)
-//     Packet.create(ctx.cmd, data)
-//     const result = await next(ctx)
-//     if (result) {
-//       const payload = serializer.deserialize(
-//         result,
-//         Packet.PACKET_TYPE_RESPONSE
-//       )
-//       return payload.data
-//     }
-//   }
-// }
-
 export function ingress(serializer) {
   return async (ctx, next) => {
     const { data, type } = ctx.msg
     ctx.packet = ctx.deserialize(data, type)
-    // ctx.packet = Packet.create(type, payload)
 
-    console.log('ingres deserializer', ctx.packet)
+    const packet = await next(ctx)
 
-    const result = await next(ctx)
-
-    if (Packet.isRequest(ctx.packet)) {
-      const packet = Packet.create(
-        Packet.PACKET_TYPE_RESPONSE,
-        result,
-        ctx.packet.payload.sender
-      )
+    if (packet) {
       packet.payload = ctx.serialize(packet)
       return packet
-      const res = serializer.serialize(result, Packet.PACKET_TYPE_RESPONSE)
-      return Packet.create(Packet.PACKET_TYPE_RESPONSE, res, payload.sender)
     }
   }
 }
 
 export function egress(serializer) {
   return (ctx, next) => {
-    const payload = {
-      id: ctx.id,
-      data: ctx.msg,
-      sender: ctx.nodeID // ?
-    }
-
-    const data = serializer.serialize(payload)
-    ctx.packet = Packet.create(ctx.cmd, data)
-
-    // console.log('egress serializer', ctx.packet)
-
+    ctx.packet.payload = ctx.serialize(ctx.packet)
     return next(ctx)
   }
 }

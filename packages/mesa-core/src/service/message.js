@@ -39,17 +39,3 @@ export class Message {
 
 Message.NULL = Symbol(null)
 Message.UNHANDLED = Symbol('Unhandled')
-
-// class Response {
-//   static from(message = Message.NULL) {
-//     return new Response(message)
-//   }
-
-//   static isUnhandled(response) {
-//     return response.message === Message.NULL
-//   }
-
-//   constructor(message) {
-//     this.message = message
-//   }
-// }

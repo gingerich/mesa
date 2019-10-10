@@ -1,15 +1,12 @@
 export function fallback(fallbackResponse) {
   return (ctx, next) => {
-    return next(ctx).catch(error => {
-      console.error(error)
+    const result = next(ctx)
 
-      // const fallbackResponse =
-      //   typeof resolver === 'function' ? resolver(ctx) : resolver
+    if (!fallbackResponse) {
+      return result
+    }
 
-      if (!fallbackResponse) {
-        throw error
-      }
-
+    return result.catch(error => {
       if (typeof fallbackResponse !== 'function') {
         return fallbackResponse
       }
