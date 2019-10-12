@@ -18,7 +18,7 @@ export class Actions extends Component {
 Actions.Handler = class ActionHandler extends Component {
   compose(stack) {
     const handler = stack()
-    const fallbackMiddleware = fallback(this.config.fallback)
+    const fallbackMiddleware = fallback(() => this.config.fallback)
 
     return ctx => fallbackMiddleware(ctx, handler)
   }

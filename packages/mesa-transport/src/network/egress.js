@@ -24,7 +24,7 @@ class Egress extends Interface {
         .use(this.parent.middleware)
         .use(this.middleware)
 
-      const egressFallback = Middleware.fallback((ctx, err) => {
+      const egressFallback = Middleware.fallback(() => (err, ctx) => {
         if (err instanceof Errors.UnhandledMessageError) {
           return egressService.call(ctx.msg, null, { ctx })
         }
