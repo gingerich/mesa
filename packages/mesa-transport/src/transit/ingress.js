@@ -74,7 +74,7 @@ export class IngressHandler {
     return (data, error = null) => {
       const payload = {
         id: request.cid,
-        origin: this.nodeId,
+        origin: this.transit.nodeId,
         data
       }
 
