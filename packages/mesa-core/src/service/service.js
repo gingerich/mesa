@@ -1,5 +1,4 @@
 import EventEmitter from 'eventemitter3'
-import uuidv1 from 'uuid/v1'
 import { compose } from '@mesa/component'
 import * as Context from './context'
 import { Message } from './message'
@@ -13,7 +12,6 @@ const defaultHandler = () => UnhandledMessageError.reject()
 export class Service extends EventEmitter {
   constructor(namespace, schema) {
     super('service')
-    this.id = uuidv1()
     this.namespace = namespace
     this.schema = schema
     this.name = schema.name
@@ -111,7 +109,6 @@ export class Service extends EventEmitter {
     if (opts.ctx) {
       const ctx = opts.ctx
       ctx.msg = message.body
-      // ctx.nodeID = this.broker.nodeID
       return ctx
     }
 
