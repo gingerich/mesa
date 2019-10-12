@@ -1,4 +1,4 @@
-import { uuid } from '../utils'
+import { uuid } from '@mesa/util'
 
 const baseContext = {
   // cmd: 'REQUEST',
@@ -38,7 +38,7 @@ export const create = (service, msg, extendedContext, opts) => {
   context.service = service
   context.msg = msg
   context.cmd = opts.cmd
-  context.meta = opts.meta
+  context.meta = opts.meta || {}
   context.options = opts
   return context
 }
