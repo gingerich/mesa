@@ -20,9 +20,9 @@ export class MesaRetryableError extends MesaError {
   }
 }
 
-export class UnhandledMessageError extends MesaRetryableError {
+export class ActionNotFoundError extends MesaRetryableError {
   constructor(data) {
-    const message = `No handler for message`
+    const message = `No handler found for message`
     super(message)
   }
 }
@@ -41,5 +41,5 @@ module.exports = {
   MesaError,
   MesaRetryableError,
 
-  UnhandledMessageError
+  ActionNotFoundError
 }

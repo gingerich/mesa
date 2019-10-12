@@ -3,11 +3,11 @@ import { compose } from '@mesa/component'
 import * as Context from './context'
 import { Message } from './message'
 import { Hooks } from './hook'
-import { UnhandledMessageError } from './errors'
+import { ActionNotFoundError } from './errors'
 import { Config } from '../components'
 import { Stack } from '../components/common'
 
-const defaultHandler = () => UnhandledMessageError.reject()
+const defaultHandler = () => ActionNotFoundError.reject()
 
 export class Service {
   constructor(namespace, schema) {

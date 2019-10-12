@@ -1,4 +1,4 @@
-import { Service, Message, Middleware, Errors } from '@mesa/core'
+import { Service, Middleware, Errors } from '@mesa/core'
 import Connector from './connector'
 import Interface from './interface'
 
@@ -25,7 +25,7 @@ class Egress extends Interface {
         .use(this.middleware)
 
       const egressFallback = Middleware.fallback(() => (err, ctx) => {
-        if (err instanceof Errors.UnhandledMessageError) {
+        if (err instanceof Errors.ActionNotFoundError) {
           return egressService.call(ctx.msg, null, { ctx })
         }
 
