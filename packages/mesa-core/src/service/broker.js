@@ -1,6 +1,6 @@
+import { uuid } from '@mesa/util'
 import ServiceFactory from './factory'
 import { Namespace } from './namespace'
-import { uuid } from '../utils'
 
 export class Broker {
   constructor(options = {}) {

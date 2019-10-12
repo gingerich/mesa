@@ -1,3 +1,4 @@
+import { uuid } from '@mesa/util'
 import Packet from '../packet'
 
 export class EgressHandler {
@@ -30,10 +31,10 @@ export class EgressHandler {
 
     return Packet.create(type, {
       id: ctx.id,
-      rid: 'todo', //uuid(),
+      rid: uuid(),
       pid: ctx.request && ctx.request.id,
-      data: ctx.msg,
-      origin: this.transit.nodeId
+      origin: this.transit.nodeId,
+      data: ctx.msg
     })
   }
 
