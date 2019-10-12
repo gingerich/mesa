@@ -1,12 +1,14 @@
-import invariant from 'invariant'
-import { create as createService } from '.'
-import { Service } from './service'
-import { getNodeID } from '../utils'
+import ServiceFactory from './factory'
+import { Namespace } from './namespace'
+import { uuid } from '../utils'
 
 export class Broker {
   constructor(options = {}) {
     this.options = options
-    this.nodeID = this.options.nodeID || getNodeID()
+    this.id = uuid()
+
+    // root-level namespace
+    this.namespace = new Namespace({ nested: true })
 
     // service registry
     this.registry = new Map()
@@ -15,18 +17,15 @@ export class Broker {
     this.logger = console
 
     const self = this
-    this.service = createService(
-      {
-        name: 'broker',
-        context: {
-          broker: self,
-          get logger() {
-            return this.broker.logger
-          }
+    this.service = new ServiceFactory(this.namespace, {
+      name: `broker-${this.id}`,
+      context: {
+        broker: self,
+        get logger() {
+          return this.broker.logger
         }
-      },
-      this.options
-    )
+      }
+    })
   }
 
   plugin(plugin) {
@@ -34,28 +33,15 @@ export class Broker {
     return this
   }
 
-  use(name, service) {
-    if (name instanceof Service) {
-      service = name
-      name = service.name
-    }
-
-    invariant(typeof name === 'string', 'Expected name to be a String')
-
-    this.registry.set(name, service)
-    this.service.use(name, service)
-
+  use(...middleware) {
+    this.service.use(...middleware)
     return this
   }
 
   createService(schema, opts = {}) {
-    const options = { ...this.options, ...opts }
-    // schema.broker = this
-    const service = createService(schema, options)
-
-    // Setup service here
-
-    this.use(service)
+    const namespace = this.namespace.ns(schema.name)
+    const service = new ServiceFactory(namespace, schema)
+    this.registry.set(schema.name, service)
     return service
   }
 
