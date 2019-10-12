@@ -4,18 +4,18 @@ export class MesaError extends Error {
     throw error
   }
 
-  constructor(message, code, type, data) {
+  constructor(message, code = 500, data = null) {
     super(message)
-    this.code = code || 500
-    this.type = type
+    this.code = code
     this.data = data
     this.retryable = false
+    this.type = this.constructor.type
   }
 }
 
 export class MesaRetryableError extends MesaError {
-  constructor(message, code, type, data) {
-    super(message, code, type, data)
+  constructor(message, code, data) {
+    super(message, code, data)
     this.retryable = true
   }
 }
