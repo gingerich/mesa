@@ -20,3 +20,5 @@ export class Transit {
     return this.egressHandler.handler()
   }
 }
+
+Transit.prototype.PROTOCOL_VERSION = Transit.PROTOCOL_VERSION = '1'

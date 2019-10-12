@@ -34,7 +34,9 @@ export class EgressHandler {
       rid: uuid(),
       pid: ctx.request && ctx.request.id,
       origin: this.transit.nodeId,
-      data: ctx.msg
+      data: ctx.msg,
+      meta: ctx.meta,
+      v: this.transit.PROTOCOL_VERSION
     })
   }
 

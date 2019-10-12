@@ -7,19 +7,17 @@ export class IngressHandler {
 
   handler() {
     return (ctx, next) => {
-      const { packet = {} } = ctx
-
-      if (Packet.isResponse(packet)) {
-        this.handleResponse(packet)
+      if (Packet.isResponse(ctx.packet)) {
+        this.handleResponse(ctx.packet)
         return
       }
 
-      if (Packet.isEvent(packet)) {
+      if (Packet.isEvent(ctx.packet)) {
         this.handleEvent(ctx, next)
         return
       }
 
-      if (Packet.isRequest(packet)) {
+      if (Packet.isRequest(ctx.packet)) {
         return this.handleRequest(ctx, next)
       }
     }
@@ -31,6 +29,7 @@ export class IngressHandler {
     ctx.request = {
       id: payload.rid,
       cid: payload.id,
+      meta: payload.meta,
       origin: payload.origin
     }
 
@@ -71,11 +70,13 @@ export class IngressHandler {
   }
 
   getResponsePacketFactory(request) {
-    return (data, error = null) => {
+    return (msg, error = null) => {
       const payload = {
         id: request.cid,
+        data: msg,
+        meta: request.meta,
         origin: this.transit.nodeId,
-        data
+        v: this.transit.PROTOCOL_VERSION
       }
 
       if (error !== null) {
