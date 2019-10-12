@@ -7,6 +7,8 @@ export class IngressHandler {
 
   handler() {
     return (ctx, next) => {
+      this.assertProtocolVersionMatch(ctx.packet)
+
       if (Packet.isResponse(ctx.packet)) {
         this.handleResponse(ctx.packet)
         return
@@ -84,6 +86,16 @@ export class IngressHandler {
       }
 
       return new Packet(Packet.PACKET_RESPONSE, payload, request.origin)
+    }
+  }
+
+  assertProtocolVersionMatch(packet) {
+    if (packet.payload.v !== this.transit.PROTOCOL_VERSION) {
+      throw new ProtocolVersionMismatchError({
+        nodeId: this.transit.nodeId,
+        expected: this.transit.PROTOCOL_VERSION,
+        received: packet.payload.v
+      })
     }
   }
 }
