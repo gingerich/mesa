@@ -18,17 +18,6 @@ export function client(config) {
   return Client.spec(config)
 }
 
-export function plugin(opts = {}) {
-  return service => {
-    service.on('connect', () => {
-      const server = listen(createServer(opts.server), service, opts.connection)
-      once(server, 'listening').then(() =>
-        service.emit('tcp:connected', server)
-      )
-    })
-  }
-}
-
 export function transport(opts = {}) {
   const defaultConnection = {
     port: 3000

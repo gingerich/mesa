@@ -9,14 +9,14 @@ import { Stack } from '../components/common'
 
 const defaultHandler = () => UnhandledMessageError.reject()
 
-export class Service extends EventEmitter {
+export class Service {
   constructor(namespace, schema) {
-    super('service')
     this.namespace = namespace
     this.schema = schema
     this.name = schema.name
     this.config = schema.config
     this.hooks = new Hooks()
+    this.bus = new EventEmitter(this.name)
     // this.context = Context.extend(schema.context)
   }
 
