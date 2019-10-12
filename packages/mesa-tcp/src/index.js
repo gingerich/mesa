@@ -53,7 +53,7 @@ export function transport(opts = {}) {
             .use((ctx, next) => {
               return next(ctx).then(result => {
                 const pkt = ctx.deserialize(result, 'RESPONSE')
-                transit.handleResponse(pkt)
+                transit.ingressHandler.handleResponse(pkt)
               })
             })
             .use(client(connection))
