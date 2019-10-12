@@ -4,9 +4,9 @@ export class MesaError extends Error {
     throw error
   }
 
-  constructor(message, code = 500, data = null) {
+  constructor(message, code, data) {
     super(message)
-    this.code = code
+    this.code = code || 500
     this.data = data
     this.retryable = false
     this.type = this.constructor.type
@@ -24,6 +24,16 @@ export class UnhandledMessageError extends MesaRetryableError {
   constructor(data) {
     const message = `No handler for message`
     super(message)
+  }
+}
+
+export class ProtocolVersionMismatchError extends MesaError {
+  static get type() {
+    return 'PROTOCOL_VERSION_MISMATCH'
+  }
+
+  constructor(data) {
+    super(`Mismatching protocol version`, 500, data)
   }
 }
 
