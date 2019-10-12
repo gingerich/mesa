@@ -2,7 +2,7 @@ import { uuid } from '@mesa/util'
 import ServiceFactory from './factory'
 import { Namespace } from './namespace'
 
-export class Broker {
+export class ServiceBroker {
   constructor(options = {}) {
     this.options = options
     this.id = uuid()
@@ -53,3 +53,5 @@ export class Broker {
     return this.service.call(...args)
   }
 }
+
+ServiceBroker.prototype.MESA_VERSION = ServiceBroker.MESA_VERSION = require('../../package.json').version

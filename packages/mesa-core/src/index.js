@@ -3,7 +3,7 @@ export const Service = { create }
 
 export * from './singleton'
 
-export { Broker as ServiceBroker } from './service/broker'
+export * from './service/broker'
 export * from './service/context'
 export * from './service/message'
 

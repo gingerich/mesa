@@ -1,6 +1,6 @@
-import { Broker } from './service/broker'
+import { ServiceBroker } from './service/broker'
 
-export const broker = new Broker()
+export const broker = new ServiceBroker()
 
 export const call = broker.call.bind(broker)
 
