@@ -11,8 +11,12 @@ class Greetings extends Mesa.Component {
   }
 }
 
-Mesa.createService()
-  .action({ cmd: 'greet' }, Greetings.spec({ greeting: 'Hello' }))
+const greetingService = Mesa.createService().action(
+  { cmd: 'greet' },
+  Greetings.spec({ greeting: 'Hello' })
+)
+
+greetingService
   .call({ cmd: 'greet', name: 'World' })
   .then(res => console.log(res))
 
