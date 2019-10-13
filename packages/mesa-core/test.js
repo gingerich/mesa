@@ -1,72 +1,102 @@
-const Mesa = require('./lib')
+const { ServiceBroker, Component } = require('./lib')
+// import Mesa, { ServiceBroker as Broker } from '@mesa/core'
 
-// Mesa.create()
-//   .call({ a: 1 }).then(console.log.bind(console, 'done'))
+const broker = new ServiceBroker()
 
-// const Context = Mesa.createContext(123)
-
-// const context = ({ Context }) => (LoC) => {
-//   return Mesa.Component.functional((config) =>
-//     Context.spec({
-//       subcomponents: ctx => LoC.spec({ ...config, ctx })
-//     })
-//   )
-// }
-
-// class Test extends Mesa.Component {
-
-//   get call () {
-//     return this.config.ctx.call
-//   }
-
-//   compose () {
-//     return msg => this.call({ a: 1, val: this.config.value })
-//   }
-// }
-
-// const ContextAwareTest = context(service)(Test)
-
-// service.ns({ ns: 'test' })
-// .action({a:1}, msg => ({ ...msg, done: 'ok' }))
-// .action({a:2}, ContextAwareTest.spec({ value: 'test' }))
-// .action({a:3}, msg => msg)
-
-const testService = Mesa.createService().action({ foo: 'bar' }, () => ({
-  you: 'bad boy lance'
-}))
-
-Mesa.createService(() => ({
+const ops = broker.createService({
+  name: 'ops',
   actions: [
-    Mesa.action({ a: 1 }, ({ msg }) => ({ ...msg, done: 'ok' })),
-    // Mesa.action({a:2}, ContextAwareTest.spec({ value: 'test' }))
-    Mesa.action({ foo: 'foo' }, () => 'wut'),
-    Mesa.action({ foo: 'bar' }, ctx => ctx.defer()),
-    // Mesa.action({foo:'bar' }, ctx => ({ ...ctx.defer(), a: 1 })),
-    Mesa.action(['add', { test: true }], ({ msg: [c, { a, b }] }) => ({
-      sum: a + b
-    }))
+    ['add', ({ msg: { a, b } }) => a + b],
+    ['sub', ({ msg: { a, b } }) => a - b]
   ]
-}))
-  .use(testService)
+  // actions: {
+  //   add: {
+  //     match: { act: 'add', test: 1 },
+  //     fallback: 'foo',
+  //     handler() {}
+  //   }, // .action({ act: 'add', test: 1 }, handler, { fallback })
+  //   sub: () => {}, // .action('sub', () => {})
+  //   mult: Multiply.spec() // .action('mult', Multiply.spec())
+  // }
+})
 
-  // // .call({ ns: 'test', a: 2 }).then(res => console.log(res))
-  .call({ foo: 'bar' })
-  .then(res => console.log(res))
-// .call('add', { test: true, a: 1, b: 5 }).then(res => console.log(res))
+broker.createService('math').use('ops', ops) // Problem: ops is "double used"
 
-// Mesa.createService()
-//   .action((service) => ({
-//     add ({ a, b }) {
-//       return a + b
-//     },
-//     sub ({ a, b }, next) {
-//       return a - b
-//     }
-//   }))
-//   .action({ act: 'add' }, ({ a, b }) => a + b)
+const add = broker.call.bind(broker, 'math.ops.add')
+const sub = broker.call.bind(broker, 'math.ops.sub')
 
-// Mesa.createService({ upstream: [auth()] })
-//   .action({ act: 'add' }, Users)
-//   .action({ act: 'sub' }, ({ ctx }) => (msg) => {
-//     return ctx.call({ act: 'add', a: msg.a, b: -msg.b })
-//   })
+async function fn() {
+  aMinusB = await sub({ a: -4, b: 2 })
+  return add({ a: 8, b: aMinusB })
+}
+
+let i = 1000
+while (--i) {
+  // fn()
+}
+// fn().then(console.log.bind(console))
+
+class Test extends Component {
+  compose(stack) {
+    return async ctx => {
+      return `this is a test: ${ctx.config.foo} ${await ctx.call('test.bar', {
+        test: 'test'
+      })}`
+    }
+  }
+}
+
+test = new ServiceBroker({
+  foo: 'bar'
+})
+
+test
+  .createService({
+    name: 'test'
+  })
+  .use((ctx, next) => {
+    ctx.configure({
+      foo: 'foo'
+    })
+    return next(ctx)
+  })
+  .action('bar', ({ msg }) => `Hello ${msg.test}`)
+  .action('foo', Test.spec({ a: 1 }))
+// .event('user.created', UserCreated.spec())
+// .event('.node.*', () => {})
+
+test.call('test.foo').then(console.log.bind(console))
+
+const cache = opts => service => {
+  const cache = {}
+  service.hook('action', async (ctx, next) => {
+    const config = { ...opts, ...ctx.config.cache }
+    const { key } = config
+    let result = cache[key]
+    if (result === undefined) {
+      result = await next(ctx)
+      cache[key] = result
+    }
+    return result
+  })
+}
+
+const m = (ctx, next) => {
+  ctx.hook('action')(next)
+}
+
+class Hook extends Mesa.Component {
+  compose() {
+    return (ctx, next) => ctx.hook(this.config.name)(next)
+  }
+}
+
+const transport = Transport.createLayer()
+  .protocol('tcp', TCP.transport())
+  .transport(({ ingress, egress }) => {
+    ingress.at('tcp://localhost:3000').use(Transport.retries())
+  })
+
+broker.plugin(transport.plugin())
+
+transport.connect()

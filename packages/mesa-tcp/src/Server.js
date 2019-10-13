@@ -9,21 +9,16 @@ export class Server {
 
     const upstream = []
 
-    if (options.deserialize) {
+    if (options.msgFromRequest) {
       const transform = ({ msg }, next) => next(options.msgFromRequest(msg))
       upstream.push(Mesa.use(transform))
     }
 
-    this.service = Mesa.createService({ upstream })
+    this.service = Mesa.createService({ name: 'server', upstream })
   }
 
-  use(...middleware) {
-    this.service.use(...middleware)
-    return this
-  }
-
-  action(pattern, handler) {
-    this.service.action(pattern, handler)
+  plugin(plug) {
+    plug(this.service)
     return this
   }
 
@@ -31,8 +26,9 @@ export class Server {
     return net
       .createServer(sock => {
         sock.on('data', async data => {
-          const response = await this.service.call({ data })
-          sock.write(response)
+          // parse data into type,payload
+          const packet = await this.service.call({ data, type: 'REQUEST' })
+          sock.write(packet.payload)
         })
 
         sock.on('end', () => debug('connection ended'))

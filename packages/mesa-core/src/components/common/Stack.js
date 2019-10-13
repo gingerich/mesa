@@ -6,5 +6,6 @@ export class Stack extends Component {
     const middleware = reverse ? [...subcomponents].reverse() : subcomponents
 
     return stack.compose(middleware)
+    // return stack
   }
 }

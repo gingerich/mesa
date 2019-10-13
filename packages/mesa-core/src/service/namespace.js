@@ -1,29 +1,57 @@
+import memoize from 'fast-memoize'
 import { matchbox } from '@mesa/util'
-import { Handler, Router } from '../components'
+import { Service } from './service'
+import { Stack } from '../components/common'
+import { Container, Actions, Router } from '../components'
 
-export default options => new Namespace(options)
+const defaultOptions = {
+  router: {
+    destructure: 'body'
+  }
+}
 
 export class Namespace {
   constructor(options) {
-    this.options = options
+    this.options = { ...defaultOptions, ...options }
     this.registry = matchbox(options.match)
+    this.container = Container.spec()
   }
 
-  action(pattern, component) {
-    const handler = Handler.spec().use(component)
+  use(ns, component) {
+    if (typeof component === 'undefined') {
+      component = ns
+      if (component instanceof Service) {
+        component = component.toComponent()
+      }
+      this.container.use(component)
+      return this
+    }
 
-    defineHandler(this.registry, pattern, handler)
+    this.ns(ns).use(component)
+    return this
+  }
+
+  action(pattern, component, options) {
+    if (typeof pattern === 'string') {
+      pattern = { act: pattern }
+    }
+
+    // if (typeof component === 'object') {
+    // }
+
+    defineHandler(this.registry, pattern, component, options)
 
     return this
   }
 
-  ns(namespace, options = {}) {
-    if (Array.isArray(namespace)) {
-      return namespace.reduce((result, ns) => result.ns(ns, opts), this)
+  ns(pattern, options = {}) {
+    if (typeof pattern === 'string') {
+      pattern = pattern.split('.').map(ns => ({ ns }))
     }
 
-    const pattern =
-      typeof namespace !== 'object' ? { ns: namespace } : namespace
+    if (Array.isArray(pattern)) {
+      return pattern.reduce((result, ns) => result.ns(ns, options), this)
+    }
 
     const ns = new Namespace(options)
 
@@ -36,20 +64,26 @@ export class Namespace {
     return this.registry.match(pattern, strict)
   }
 
-  router(options) {
-    const match = msg => this.match(msg)
-    return Router.spec({ match, ...this.options.router, ...options })
+  router(options = this.options.router) {
+    const match = memoize(msg => this.match(msg))
+    const config = { match, ...options }
+
+    return Stack.spec()
+      .use(this.container)
+      .use(Router.spec(config))
   }
 }
 
-function defineHandler(registry, pattern, handler) {
+function defineHandler(registry, pattern, component, options) {
   const node = registry.define(pattern)
 
   if (!node.handlers) {
     node.handlers = []
   }
 
-  node.handlers.unshift(handler)
+  const handler = Actions.Handler.spec(options).use(component)
+
+  node.handlers.push(handler)
 
   return node
 }

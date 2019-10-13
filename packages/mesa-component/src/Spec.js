@@ -15,7 +15,7 @@ export class Spec {
 
   constructor(type, config = {}) {
     this.type = type
-    this.config = { ...config }
+    this.config = { ...type.defaultConfig, ...config }
     this.config.subcomponents = this.config.subcomponents || []
   }
 

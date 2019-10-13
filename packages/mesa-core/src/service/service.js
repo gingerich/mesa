@@ -1,38 +1,38 @@
 import EventEmitter from 'eventemitter3'
-import uuidv1 from 'uuid/v1'
 import { compose } from '@mesa/component'
-import { Container } from '../components'
+import * as Context from './context'
+import { Message } from './message'
+import { Hooks } from './hook'
+import { ActionNotFoundError } from './errors'
+import { Config } from '../components'
+import { Stack } from '../components/common'
 
-const context = {
-  call(...args) {
-    return this.service.call(...args)
-  },
-  defer() {
-    return this.msg
-  }
-}
+const defaultHandler = () => ActionNotFoundError.reject()
 
-export class Service extends EventEmitter {
-  constructor(namespace, options) {
-    super('service')
-    this.id = uuidv1()
-    this.options = options
+export class Service {
+  constructor(namespace, schema) {
     this.namespace = namespace
-    this.container = Container.spec({ service: this })
-    this.context = Object.create(context)
+    this.schema = schema
+    this.name = schema.name
+    this.config = schema.config
+    this.hooks = new Hooks()
+    this.bus = new EventEmitter(this.name)
+    // this.context = Context.extend(schema.context)
   }
 
   /*
   * Extendability methods
   */
 
-  use(component) {
-    if (component instanceof Service) {
-      component = component.getSpec()
-    }
-
-    this.container.use(component)
+  use(ns, component) {
+    this.namespace.use(ns, component)
     return this
+  }
+
+  stack(...middleware) {
+    const stack = Stack.spec().use(...middleware)
+    this.use(stack)
+    return stack
   }
 
   plugin(plug, cb) {
@@ -43,6 +43,17 @@ export class Service extends EventEmitter {
     return this
   }
 
+  // registerHook(name, component) {
+  //   this.hooks.register(name, componentn)
+  //   const { [name]: hook = [] } = this.hooks
+  //   hook.push(component)
+  // }
+
+  // getHook(name) {
+  //   const { [name]: hook = [] } = this.hooks
+  //   return compose(hook)
+  // }
+
   /*
   * Service methods
   */
@@ -51,59 +62,68 @@ export class Service extends EventEmitter {
     return this.namespace.ns(namespace, options)
   }
 
-  action(pattern, component) {
-    this.namespace.action(pattern, component)
+  action(pattern, component, options) {
+    this.namespace.action(pattern, component, options)
     return this
   }
 
-  call(msg, ...parts) {
-    if (!this.handler) {
-      this.handler = this.compose()
+  handle(ctx, next) {
+    if (!this._handler) {
+      this._handler = this.compose()
     }
-
-    if (parts.length) {
-      msg = [msg, ...parts]
-    }
-
-    const ctx = this.createContext(msg)
-
-    // Unhandled messages should return null
-    return this.handler(ctx, () => null)
+    return this._handler(ctx, next)
   }
 
-  createContext(msg) {
-    const context = Object.create(this.context)
-    context.service = this
-    context.msg = msg
-    return context
+  call(action, msg, opts) {
+    const parts = [action]
+
+    if (typeof action === 'object' && opts === undefined) {
+      opts = msg
+      msg = null
+    }
+
+    if (msg !== null) {
+      parts.push(msg)
+    }
+
+    const message = Message.from(...parts)
+
+    const ctx = this.createContext(message, opts)
+
+    return this.handle(ctx, defaultHandler) // defaultHandler could be optional param in opts
+  }
+
+  emit(...args) {
+    const message = Message.from(...args)
+
+    const ctx = this.createContext(message, { cmd: 'event' })
+
+    return this.handle(ctx)
   }
 
   /*
   * Utility methods
   */
 
-  createContext(msg) {
-    const context = Object.create(this.context)
-    context.service = this
-    context.msg = msg
-    return context
+  createContext(message, opts = {}) {
+    if (opts.ctx) {
+      const ctx = opts.ctx
+      ctx.msg = message.body
+      return ctx
+    }
+
+    return Context.create(this, message.body, this.schema.context, opts)
+    // return this.context.create(this, msg)
   }
 
-  getSpec() {
-    return this.container
-  }
-
-  start(...args) {
-    this.emit('start', ...args)
-    return this
+  toComponent() {
+    return Config.spec(this.config).use(this.namespace.router())
   }
 
   compose() {
     return compose(
-      this.container,
+      this.toComponent(),
       this
-    ) // IDEA: create context object to pass
+    )
   }
 }
-
-export default Service

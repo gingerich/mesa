@@ -1,33 +1,44 @@
 # Mesa
+
 A sensible microservice framework
 
 ## A Quick Example
+
 ```js
 class Greetings extends Mesa.Component {
-  compose () {
+  compose() {
     return ({ msg }) => `${this.config.greeting} ${msg.name}!`
   }
 }
 
-const greetingService = Mesa.createService()
-  .action({ cmd: 'greet' }, Greetings.spec({ greeting: 'Hello' }))
-  
-greetingService.call({ cmd: 'greet', name: 'World' })
+const greetingService = Mesa.createService().action(
+  { cmd: 'greet' },
+  Greetings.spec({ greeting: 'Hello' })
+)
+
+greetingService
+  .call({ cmd: 'greet', name: 'World' })
   .then(res => console.log(res))
-  
+
 // 'Hello World!'
 ```
 
 ## Transport Layer
+
+Plug-and-play transport layer keeps your service transport independent.
+
 ```js
-const transports = Transport.createLayer()
-  .use('tcp', TCP.transport())
+const layer = Transport.createLayer()
+  .protocol('tcp', TCP.transport())
+  .use(Serializers.JSON())
 
-const transportPlugin = transports.makePlugin()
-
-greetingService.plugin(transportPlugin())
-  
-transportPlugin.start(({ tcp }) => {
-  tcp.listen(3000)
+const transporter = layer.transporter(connect => {
+  connect.ingress.at('tcp://localhost:3000')
 })
+
+Mesa.createService()
+  .plugin(transporter.plugin())
+  .action('greet', Greetings.spec({ greeting: 'Hello' }))
+
+transporter.connect().then(() => console.log('connected!'))
 ```

@@ -1,5 +1,6 @@
+import { once } from 'events'
+import { Stack } from '@mesa/core'
 import { Server } from './Server'
-import { client } from '../../mesa-http/src'
 import { Client } from './Client'
 
 export * from './Client'
@@ -9,28 +10,61 @@ export function createServer(opts) {
   return new Server(opts)
 }
 
-export function listen(component, ...args) {
-  return createServer()
-    .use(component)
-    .listen(...args)
+export function listen(server, component, ...listenArgs) {
+  return server.plugin(service => service.use(component)).listen(...listenArgs)
 }
 
 export function client(config) {
   return Client.spec(config)
 }
 
-export function plugin(opts) {
-  return service => listen(service, opts)
-}
+export function transport(opts = {}) {
+  const defaultConnection = {
+    port: 3000
+  }
 
-export function transport(opts) {
-  return ({ service, ingress, egress }) => {
-    const server = createServer(opts)
+  return (connection, transit) => {
+    connection = { ...defaultConnection, ...connection }
 
-    server.use(service)
+    return Object.create({
+      ingress(service) {
+        const server = listen(createServer(opts.server), service, connection)
+        server.on('listening', () =>
+          transit.transporter.emit('listening', 'tcp')
+        )
+        return once(server, 'listening').then(() => connection)
+      },
 
-    ingress.define((...args) => server.listen(...args))
-    egress.define((action, ...args) => service.action(action, client(...args)))
+      egress(service, action) {
+        service.action(
+          action,
+          Stack.spec()
+            .use((ctx, next) => {
+              return next(ctx).then(result => {
+                const pkt = ctx.deserialize(result, 'RESPONSE')
+                transit.ingressHandler.handleResponse(pkt)
+              })
+            })
+            .use(client(connection))
+        )
+      },
+
+      get writer() {
+        if (!this._writer) {
+          // TODO
+        }
+
+        return this._writer
+      },
+
+      get reader() {
+        if (!this._reader) {
+          // TODO
+        }
+
+        return this._reader
+      }
+    })
   }
 }
 

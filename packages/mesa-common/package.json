@@ -1,0 +1,23 @@
+{
+  "name": "@mesa/common",
+  "version": "0.0.0",
+  "description": "Useful Mesa components",
+  "main": "./lib/index.js",
+  "repository": "https://github.com/gingerich/mesa/packages/mesa-common",
+  "author": "Marlin Gingerich <marlin@gingerich.io>",
+  "license": "MIT",
+  "dependencies": {
+    "@mesa/component": "^0.0.0",
+    "@mesa/util": "^0.0.0",
+    "debug": "^3.1.0",
+    "invariant": "^2.2.3"
+  },
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "npm run clean && babel src -d lib",
+    "clean": "rm -rf lib",
+    "lint": "eslint src --fix",
+    "test": "jest",
+    "test-cov": "npm run test -- --coverage"
+  }
+}
