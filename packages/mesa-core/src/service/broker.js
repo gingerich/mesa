@@ -1,17 +1,16 @@
 import { uuid } from '@mesa/util'
-import ServiceFactory from './factory'
 import { Namespace } from './namespace'
+import { ServiceRegistry } from './registry'
+import ServiceFactory from './factory'
 
 export class ServiceBroker {
   constructor(options = {}) {
     this.options = options
     this.id = uuid()
+    this.registry = new ServiceRegistry()
 
     // root-level namespace
     this.namespace = new Namespace({ nested: true })
-
-    // service registry
-    this.registry = new Map()
 
     // TODO: configure logging from options
     this.logger = console
@@ -41,12 +40,16 @@ export class ServiceBroker {
   createService(schema, opts = {}) {
     const namespace = this.namespace.ns(schema.name)
     const service = new ServiceFactory(namespace, schema)
-    this.registry.set(schema.name, service)
+    this.registry.add(schema, service)
     return service
   }
 
-  get(name) {
-    return this.registry.get(name)
+  getService(schema) {
+    return this.registry.get(schema)
+  }
+
+  getServiceByName(name) {
+    return this.registry.getByName(name)
   }
 
   call(...args) {
