@@ -10,25 +10,34 @@ export default class Connection {
 
     if (typeof connection === 'string') {
       try {
-        const url = new URL(connection)
-        return {
-          protocol: url.protocol.slice(0, -1), // trim trailing ':'
-          username: url.username,
-          password: url.password,
-          host: url.hostname,
-          port: url.port,
-          pathname: url.pathname,
-          search: url.search,
-          searchParams: url.searchParams,
-          hash: url.hash,
-          origin: url.origin,
-          href: url.href,
-          url,
-          ...options
-        }
+        const url = Connection.Url(connection)
+        return { ...url, ...options }
       } catch (e) {
-        return { protocol: connection, ...options }
+        return { scheme: connection, ...options }
       }
+    }
+  }
+}
+
+Connection.Url = function Url(connectionString) {
+  const url = new URL(connectionString)
+  return {
+    protocol: url.protocol,
+    username: url.username,
+    password: url.password,
+    hostname: url.hostname,
+    host: url.host,
+    port: url.port,
+    pathname: url.pathname,
+    search: url.search,
+    searchParams: url.searchParams,
+    hash: url.hash,
+    origin: url.origin,
+    href: url.href,
+    scheme: url.protocol.slice(0, -1), // trim trailing ':'
+    // url,
+    get url() {
+      return new URL(this.href)
     }
   }
 }

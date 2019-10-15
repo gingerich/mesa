@@ -6,14 +6,14 @@ import { Transit } from './transit'
 export default class Transporter extends EventEmitter {
   static getResolver(layer, transit) {
     return connection => {
-      const transport = layer.transports[connection.protocol]
+      const transport = layer.transports[connection.scheme]
 
-      invariant(transport, `No protocol definition for ${connection.protocol}`)
+      invariant(transport, `No protocol definition for ${connection.scheme}`)
 
       // immutability of connection object required for effective memoization (may need to deep copy instead?)
-      const conn = { ...connection }
+      // const conn = { ...connection }
 
-      return transport(conn, transit)
+      return transport(connection, transit)
     }
   }
 

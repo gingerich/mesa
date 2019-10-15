@@ -24,15 +24,19 @@ export function transport(opts = {}) {
   }
 
   return (connection, transit) => {
-    connection = { ...defaultConnection, ...connection }
+    const settings = {
+      ...defaultConnection,
+      ...connection,
+      host: connection.hostname // remap host
+    }
 
     return Object.create({
       ingress(service) {
-        const server = listen(createServer(opts.server), service, connection)
+        const server = listen(createServer(opts.server), service, settings)
         server.on('listening', () =>
           transit.transporter.emit('listening', 'tcp')
         )
-        return once(server, 'listening').then(() => connection)
+        return once(server, 'listening').then(() => settings)
       },
 
       egress(service, action) {
@@ -45,7 +49,7 @@ export function transport(opts = {}) {
                 transit.ingressHandler.handleResponse(pkt)
               })
             })
-            .use(client(connection))
+            .use(client(settings))
         )
       },
 
