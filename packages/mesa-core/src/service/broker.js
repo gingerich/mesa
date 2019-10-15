@@ -40,7 +40,7 @@ export class ServiceBroker {
   createService(schema, opts = {}) {
     const namespace = this.namespace.ns(schema.name)
     const service = new ServiceFactory(namespace, schema)
-    this.registry.add(schema, service)
+    this.registry.add(service.schema, service)
     return service
   }
 
