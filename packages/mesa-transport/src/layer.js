@@ -5,7 +5,6 @@ import Network from './network'
 export default class Layer {
   constructor() {
     this.transports = {}
-    this.middleware = []
     this.plugins = []
   }
 
@@ -21,24 +20,11 @@ export default class Layer {
     return this
   }
 
-  // use(...middleware) {
-  //   this.middleware.push(
-  //     ...[]
-  //       .concat(...middleware)
-  //       .map(m => (typeof m === 'function' ? { ingress: m, egress: m } : m))
-  //   )
-
-  //   return this
-  // }
-
   transporter(init) {
     const connect = new Network.Interface()
     const transporter = new Transporter(this, connect)
 
-    this.plugins.forEach(plugin => plugin(connect))
-
-    // connect.ingress.use(this.middleware.map(m => m.ingress))
-    // connect.egress.use(this.middleware.map(m => m.egress))
+    this.plugins.forEach(plugin => plugin(connect, this))
 
     init(connect)
 
