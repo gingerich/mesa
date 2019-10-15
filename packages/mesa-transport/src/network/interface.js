@@ -3,11 +3,11 @@ import Connection from './connection'
 import Connector from './connector'
 
 export default class Interface extends Connector {
-  static resolve(iface, ...args) {
-    const connection = Connection.resolve(...args)
-    connection.args = args
-    return new this(iface, connection)
-  }
+  // static resolve(iface, ...args) {
+  //   const connection = Connection.resolve(...args)
+  //   connection.args = args
+  //   return new this(iface, connection)
+  // }
 
   constructor(parent, connection) {
     super(connection)
@@ -53,10 +53,11 @@ export default class Interface extends Connector {
 
   resolve(connection) {
     const iface = new Interface(this, connection)
+    iface.use(this.middleware)
     // Order matters here
     // egress should connect first to ensure service.use() called before ingress can service.call()
-    iface.egress.at(connection)
-    iface.ingress.at(connection)
+    iface.egress.at(connection).use(this.egress.middleware)
+    iface.ingress.at(connection).use(this.ingress.middleware)
     return iface
   }
 
