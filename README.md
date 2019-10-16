@@ -1,6 +1,6 @@
 # Mesa
 
-A sensible microservice framework
+A sensible component framework for anything
 
 ## A Quick Example
 
@@ -11,13 +11,14 @@ class Greetings extends Mesa.Component {
   }
 }
 
-const greetingService = Mesa.createService().action(
-  { cmd: 'greet' },
+const greetingService = Mesa.createService()
+greetingService.action(
+  { act: 'greet' },
   Greetings.spec({ greeting: 'Hello' })
 )
 
 greetingService
-  .call({ cmd: 'greet', name: 'World' })
+  .call('greet', { name: 'World' })
   .then(res => console.log(res))
 
 // 'Hello World!'
