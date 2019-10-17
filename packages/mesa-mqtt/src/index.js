@@ -6,7 +6,7 @@ export function transport(opts = {}) {
     const transporter = new MqttTransporter(transit, opts)
     const settings = { ...connection, host: connection.hostname }
     const client = mqtt.connect(settings)
-    transporter.init(client, connection)
+    transporter.init(client, settings)
     return transporter
   }
 }
