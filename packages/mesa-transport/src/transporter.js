@@ -23,10 +23,10 @@ export default class Transporter extends EventEmitter {
     this.interface = iface
   }
 
-  plugin() {
+  plugin(opts) {
     return service => {
       // memoize resolver to use same transport instance per unique connection
-      const transit = new Transit(this, service)
+      const transit = new Transit(this, service, opts)
       const resolve = memoize(Transporter.getResolver(this.layer, transit))
       const connect = this.interface.connector(resolve, transit)
 

@@ -38,6 +38,7 @@ export const create = (service, msg, extendedContext, opts) => {
   context.service = service
   context.msg = msg
   context.cmd = opts.cmd
+  context.nodeId = opts.nodeId
   context.meta = opts.meta || {}
   context.options = opts
   return context

@@ -3,10 +3,10 @@ import { IngressHandler } from './ingress'
 import { EgressHandler } from './egress'
 
 export class Transit {
-  constructor(transporter, service) {
+  constructor(transporter, service, options) {
     this.transporter = transporter
     this.service = service
-    this.nodeId = getNodeID(service)
+    this.nodeId = options.nodeId || getNodeID(service)
     this.pendingRequests = new Map()
     this.ingressHandler = new IngressHandler(this)
     this.egressHandler = new EgressHandler(this)

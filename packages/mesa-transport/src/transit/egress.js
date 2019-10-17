@@ -29,15 +29,21 @@ export class EgressHandler {
     const type =
       ctx.cmd === 'event' ? Packet.PACKET_EVENT : Packet.PACKET_REQUEST
 
-    return Packet.create(type, {
-      id: ctx.id,
-      rid: uuid(),
-      pid: ctx.request && ctx.request.id,
-      origin: this.transit.nodeId,
-      data: ctx.msg,
-      meta: ctx.meta,
-      v: this.transit.PROTOCOL_VERSION
-    })
+    const target = ctx.nodeId
+
+    return Packet.create(
+      type,
+      {
+        id: ctx.id,
+        rid: uuid(),
+        pid: ctx.request && ctx.request.id,
+        origin: this.transit.nodeId,
+        data: ctx.msg,
+        meta: ctx.meta,
+        v: this.transit.PROTOCOL_VERSION
+      },
+      target
+    )
   }
 
   makeRequest(ctx) {
