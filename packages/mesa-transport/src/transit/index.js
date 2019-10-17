@@ -3,7 +3,7 @@ import { IngressHandler } from './ingress'
 import { EgressHandler } from './egress'
 
 export class Transit {
-  constructor(transporter, service, options) {
+  constructor(transporter, service, options = {}) {
     this.transporter = transporter
     this.service = service
     this.nodeId = options.nodeId || getNodeID(service)
