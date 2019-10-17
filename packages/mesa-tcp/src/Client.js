@@ -13,8 +13,7 @@ export class Client extends Mesa.Component {
     return ctx => {
       const client = net.createConnection(this.config, () => {
         debug('connected')
-        const { payload } = ctx.packet
-        client.write(payload)
+        client.write(ctx.packet.payload)
       })
 
       client.on('end', () => debug('disconnected'))

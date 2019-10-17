@@ -85,7 +85,7 @@ export class IngressHandler {
         payload.error = error
       }
 
-      return new Packet(Packet.PACKET_RESPONSE, payload, request.origin)
+      return Packet.create(Packet.PACKET_RESPONSE, payload, request.origin)
     }
   }
 

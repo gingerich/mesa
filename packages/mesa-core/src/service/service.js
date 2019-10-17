@@ -16,7 +16,7 @@ export class Service {
     this.name = schema.name
     this.config = schema.config
     this.hooks = new Hooks()
-    this.bus = new EventEmitter(this.name)
+    this.events = new EventEmitter(this.name)
     // this.context = Context.extend(schema.context)
   }
 
@@ -125,5 +125,13 @@ export class Service {
       this.toComponent(),
       this
     )
+  }
+
+  onActionAdded(listener) {
+    this.events.on('action:add', listener)
+  }
+
+  onActionRemoved(listener) {
+    this.events.on('action:remove', listener)
   }
 }
