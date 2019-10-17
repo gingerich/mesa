@@ -2,25 +2,22 @@ import { once } from 'events'
 import { Packet, PubSubTransport } from '@mesa/transport'
 
 export default class MqttTransport extends PubSubTransport {
-  init(client) {
-    this.client = client
-    const connected = once(this.client, 'connected')
+  init(client, connection) {
+    super.init(client, connection)
+    const connected = Promise.resolve(
+      this.client.connected || once(this.client, 'connect')
+    )
     this.ready = connected.then(() => this.subscribeToTopics())
   }
 
   ingress(service) {
-    const publishCallback = packet => this.publish(packet)
-    const handleIncomingMessage = this.getMessageHandler(
-      service,
-      publishCallback
+    const handleIncomingMessage = this.getResponsePublisher(
+      this.getMessageHandler(service)
     )
 
     this.client.on('message', async (topic, data) => {
       const type = this.getTypeFromTopic(topic)
-      const packet = await handleIncomingMessage(data, type)
-      if (Packet.isResponse(packet)) {
-        this.publish(packet)
-      }
+      handleIncomingMessage(data, type)
     })
 
     return this.ready
@@ -32,12 +29,12 @@ export default class MqttTransport extends PubSubTransport {
     })
   }
 
-  subscribe(target) {
-    const topic = this.getTopicName(target)
+  subscribe(target, type) {
+    const topic = this.getTopicName(target, type)
     return new Promise((resolve, reject) => {
       this.client.subscribe(topic, err => {
         if (err) return reject(err)
-        resolve()
+        resolve(topic)
       })
     })
   }
@@ -47,7 +44,7 @@ export default class MqttTransport extends PubSubTransport {
       const topic = this.getTopicName(packet.target, packet.type)
       this.client.publish(topic, packet.payload, err => {
         if (err) return reject(err)
-        resolve()
+        resolve(packet)
       })
     })
   }
