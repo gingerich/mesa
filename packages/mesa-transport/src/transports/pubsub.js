@@ -54,7 +54,7 @@ export class PubSubTransport extends BaseTransport {
   }
 
   getTopicFromConnection() {
-    return this.connection.hash.slice(1) || null
+    return (this.connection.hash && this.connection.hash.slice(1)) || null
   }
 
   getResponsePublisher(messageHandler) {

@@ -10,8 +10,9 @@ export default class Transporter extends EventEmitter {
 
       invariant(transport, `No protocol definition for ${connection.scheme}`)
 
-      // immutability of connection object required for effective memoization (may need to deep copy instead?)
-      // const conn = { ...connection }
+      // only enforce immutability in dev?
+      // required for effective memoization
+      Object.freeze(connection)
 
       return transport(connection, transit)
     }

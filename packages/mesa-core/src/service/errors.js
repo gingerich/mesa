@@ -23,7 +23,7 @@ export class MesaRetryableError extends MesaError {
 export class ActionNotFoundError extends MesaRetryableError {
   constructor(data) {
     const message = `No handler found for message`
-    super(message)
+    super(message, 500, data)
   }
 }
 
@@ -41,5 +41,6 @@ module.exports = {
   MesaError,
   MesaRetryableError,
 
-  ActionNotFoundError
+  ActionNotFoundError,
+  ProtocolVersionMismatchError
 }

@@ -1,4 +1,5 @@
 import Packet from '../packet'
+import { Errors } from '@mesa/core'
 
 export class IngressHandler {
   constructor(transit) {
@@ -91,7 +92,7 @@ export class IngressHandler {
 
   assertProtocolVersionMatch(packet) {
     if (packet.payload.v !== this.transit.PROTOCOL_VERSION) {
-      throw new ProtocolVersionMismatchError({
+      throw new Errors.ProtocolVersionMismatchError({
         nodeId: this.transit.nodeId,
         expected: this.transit.PROTOCOL_VERSION,
         received: packet.payload.v

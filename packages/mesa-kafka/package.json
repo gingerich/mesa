@@ -1,0 +1,26 @@
+{
+  "name": "@mesa/kafka",
+  "version": "0.0.1",
+  "description": "Kafka transport for Mesa",
+  "repository": {
+    "type": "git",
+    "url": "github.com/gingerich/mesa/packages/mesa-kafka"
+  },
+  "author": "",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "npm run clean && babel src -d lib",
+    "clean": "rm -rf lib",
+    "lint": "eslint src --fix",
+    "test": "jest",
+    "test-cov": "npm run test -- --coverage"
+  },
+  "dependencies": {
+    "kafkajs": "^1.11.0"
+  },
+  "peerDependencies": {
+    "@mesa/transport": "^0.0.0"
+  }
+}

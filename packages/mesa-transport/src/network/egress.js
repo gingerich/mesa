@@ -25,7 +25,10 @@ class Egress extends Interface {
         .use(this.middleware)
 
       const egressFallback = Middleware.fallback(() => (err, ctx) => {
-        if (err instanceof Errors.ActionNotFoundError) {
+        if (
+          err instanceof Errors.ActionNotFoundError
+          // ctx.nodeId === transit.nodeId
+        ) {
           return egressService.call(ctx.msg, null, { ctx })
         }
 

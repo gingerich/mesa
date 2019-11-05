@@ -1,5 +1,5 @@
 import { once } from 'events'
-import { Packet, PubSubTransport } from '@mesa/transport'
+import { PubSubTransport } from '@mesa/transport'
 
 export default class MqttTransport extends PubSubTransport {
   init(client, connection) {
