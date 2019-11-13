@@ -1,0 +1,27 @@
+{
+  "name": "@mesa/gossip",
+  "version": "0.0.1",
+  "description": "Gossip-based transport for Mesa",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gingerich/mesa/tree/master/packages/mesa-gossip"
+  },
+  "author": "",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "npm run clean && babel src -d lib",
+    "clean": "rm -rf lib",
+    "lint": "eslint src --fix",
+    "test": "jest",
+    "test-cov": "npm run test -- --coverage"
+  },
+  "dependencies": {
+    "upring": "^0.22.0",
+    "upring-pubsub": "^0.3.0"
+  },
+  "peerDependencies": {
+    "@mesa/transport": "^0.0.0"
+  }
+}
