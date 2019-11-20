@@ -10,7 +10,7 @@
     "@mesa/component": "^0.0.0",
     "@mesa/util": "^0.0.0",
     "debug": "^3.1.0",
-    "eventemitter3": "^3.1.0",
+    "eventemitter3": "^4.0.0",
     "fast-memoize": "^2.5.1",
     "invariant": "^2.2.3"
   },
