@@ -1,24 +1,24 @@
-import { getNodeID } from '../utils'
-import { IngressHandler } from './ingress'
-import { EgressHandler } from './egress'
+import { getNodeID } from '../utils';
+import { IngressHandler } from './ingress';
+import { EgressHandler } from './egress';
 
 export class Transit {
   constructor(transporter, service, options = {}) {
-    this.transporter = transporter
-    this.service = service
-    this.nodeId = options.nodeId || getNodeID(service)
-    this.pendingRequests = new Map()
-    this.ingressHandler = new IngressHandler(this)
-    this.egressHandler = new EgressHandler(this)
+    this.transporter = transporter;
+    this.service = service;
+    this.nodeId = options.nodeId || getNodeID(service);
+    this.pendingRequests = new Map();
+    this.ingressHandler = new IngressHandler(this);
+    this.egressHandler = new EgressHandler(this);
   }
 
   ingress() {
-    return this.ingressHandler.handler()
+    return this.ingressHandler.handler();
   }
 
   egress() {
-    return this.egressHandler.handler()
+    return this.egressHandler.handler();
   }
 }
 
-Transit.prototype.PROTOCOL_VERSION = Transit.PROTOCOL_VERSION = '1'
+Transit.prototype.PROTOCOL_VERSION = Transit.PROTOCOL_VERSION = '1';

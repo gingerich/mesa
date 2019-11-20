@@ -1,35 +1,34 @@
-import { uuid } from '@mesa/util'
-import Packet from '../packet'
+import { uuid } from '@mesa/util';
+import Packet from '../packet';
 
 export class EgressHandler {
   constructor(transit) {
-    this.transit = transit
+    this.transit = transit;
   }
 
   handler() {
     return (ctx, next) => {
-      ctx.packet = this.packetFromContext(ctx)
+      ctx.packet = this.packetFromContext(ctx);
 
-      let pendingResult = true
+      let pendingResult = true;
       if (Packet.isRequest(ctx.packet)) {
-        pendingResult = this.makeRequest(ctx)
+        pendingResult = this.makeRequest(ctx);
       }
 
       return next(ctx).then(
         () => pendingResult,
         error => {
-          this.abortRequest(ctx)
-          throw error
+          this.abortRequest(ctx);
+          throw error;
         }
-      )
-    }
+      );
+    };
   }
 
   packetFromContext(ctx) {
-    const type =
-      ctx.cmd === 'event' ? Packet.PACKET_EVENT : Packet.PACKET_REQUEST
+    const type = ctx.cmd === 'event' ? Packet.PACKET_EVENT : Packet.PACKET_REQUEST;
 
-    const target = ctx.nodeId
+    const target = ctx.nodeId;
 
     return Packet.create(
       type,
@@ -43,7 +42,7 @@ export class EgressHandler {
         v: this.transit.PROTOCOL_VERSION
       },
       target
-    )
+    );
   }
 
   makeRequest(ctx) {
@@ -52,12 +51,12 @@ export class EgressHandler {
         ctx,
         resolve,
         reject
-      }
-      this.transit.pendingRequests.set(ctx.id, request)
-    })
+      };
+      this.transit.pendingRequests.set(ctx.id, request);
+    });
   }
 
   abortRequest(ctx) {
-    this.transit.pendingRequests.delete(ctx.id)
+    this.transit.pendingRequests.delete(ctx.id);
   }
 }

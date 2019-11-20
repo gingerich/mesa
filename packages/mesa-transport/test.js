@@ -1,9 +1,9 @@
-const Mesa = require('@mesa/core')
-const Transport = require('./lib')
-const { transport: tcp } = require('../mesa-tcp/lib')
-const { transport: mqtt } = require('../mesa-mqtt/lib')
-const { transport: kafka, logLevel } = require('../mesa-kafka/lib')
-const { transport: ssb, generateKey } = require('../mesa-ssb/lib')
+const Mesa = require('@mesa/core');
+const Transport = require('./lib');
+const { transport: tcp } = require('../mesa-tcp/lib');
+const { transport: mqtt } = require('../mesa-mqtt/lib');
+const { transport: kafka, logLevel } = require('../mesa-kafka/lib');
+const { transport: ssb, generateKey } = require('../mesa-ssb/lib');
 
 // const mesh = opts => (connect, layer) => {
 //   layer.protocol('udp', udp())
@@ -13,15 +13,15 @@ const { transport: ssb, generateKey } = require('../mesa-ssb/lib')
 
 // Transport.createLayer().use(mesh())
 
-const keys = generateKey()
-const keys2 = generateKey()
+const keys = generateKey();
+const keys2 = generateKey();
 
 const layer = Transport.createLayer()
   .protocol('tcp', tcp())
   .protocol('mqtt', mqtt())
   .protocol('kafka', kafka())
   .protocol('ssb', ssb())
-  .use(Transport.Serialize.JSON())
+  .use(Transport.Serialize.JSON());
 
 const transport = layer.transporter(connect => {
   // connect.ingress.at('tcp')
@@ -50,12 +50,10 @@ const transport = layer.transporter(connect => {
     logging: {
       level: 'info'
     }
-  })
-})
+  });
+});
 
-const service = Mesa.createService('test').plugin(
-  transport.plugin({ nodeId: 'test' })
-)
+const service = Mesa.createService('test').plugin(transport.plugin({ nodeId: 'test' }));
 service.action(
   { test: 123 },
   async ctx =>
@@ -65,14 +63,14 @@ service.action(
     })}`,
   {
     fallback(ctx) {
-      return 'this is fun!'
+      return 'this is fun!';
     }
   }
-)
+);
 service.action(
   { test: 123, foo: 'hello' },
   async ctx => `This is the msg: ${ctx.msg.foo} : ${await ctx.defer()}`
-)
+);
 
 const otherTransport = layer.transporter(connect => {
   // connect.ingress.at('tcp://localhost:3001')
@@ -99,33 +97,31 @@ const otherTransport = layer.transporter(connect => {
     logging: {
       level: 'info'
     }
-  })
-})
+  });
+});
 Mesa.createService('other')
   .plugin(otherTransport.plugin({ nodeId: 'other' }))
-  .action({ test: true }, ctx => `remote RESPONSE!!`)
+  .action({ test: true }, ctx => `remote RESPONSE!!`);
 
-const p = otherTransport
-  .connect()
-  .then(() => console.log('other service connected!'))
+const p = otherTransport.connect().then(() => console.log('other service connected!'));
 
-transport.on('error', err => console.error('bad', err))
-transport.on('listening', r => console.log('listening', r))
+transport.on('error', err => console.error('bad', err));
+transport.on('listening', r => console.log('listening', r));
 
 transport
   .connect()
   .then(() => p)
   .then(() => {
-    console.log('connected!')
+    console.log('connected!');
   })
   .then(() => {
     service.call({ test: 123 }).then(
       result => {
-        console.log('RESULT', result)
+        console.log('RESULT', result);
       },
       err => console.error('bad', err)
-    )
-  })
+    );
+  });
 
 // service.call({ test: 123 }).then(
 //   result => {

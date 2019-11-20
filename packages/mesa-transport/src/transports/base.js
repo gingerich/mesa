@@ -1,7 +1,7 @@
 export class BaseTransport {
   constructor(transit, options = {}) {
-    this.transit = transit
-    this.options = options
+    this.transit = transit;
+    this.options = options;
   }
 
   ingress(/* service */) {
@@ -13,6 +13,6 @@ export class BaseTransport {
   }
 
   getMessageHandler(service, callback) {
-    return (data, type) => service.call({ data, type })
+    return (data, type) => service.call({ data, type });
   }
 }

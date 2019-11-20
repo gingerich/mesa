@@ -1,23 +1,23 @@
-import { create } from './service'
-export const Service = { create }
+import { create } from './service';
+export const Service = { create };
 
-export * from './singleton'
+export * from './singleton';
 
-export * from './service/broker'
-export * from './service/context'
-export * from './service/message'
+export * from './service/broker';
+export * from './service/context';
+export * from './service/message';
 
-import * as Errors from './service/errors'
-export { Errors }
+import * as Errors from './service/errors';
+export { Errors };
 
-import * as Middleware from './middleware'
-export { Middleware }
+import * as Middleware from './middleware';
+export { Middleware };
 
-export { default as plugins } from './plugins'
-export * from './components'
-export { Stack } from './components/common'
+export { default as plugins } from './plugins';
+export * from './components';
+export { Stack } from './components/common';
 
-export * from '@mesa/component'
-export * from '@mesa/util'
+export * from '@mesa/component';
+export * from '@mesa/util';
 
-export default module.exports
+export default module.exports;

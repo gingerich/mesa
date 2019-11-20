@@ -1,5 +1,5 @@
-import os from 'os'
+import os from 'os';
 
 export function getNodeID(service) {
-  return `${service.name}::${os.hostname()}-${process.pid}`
+  return `${service.name}::${os.hostname()}-${process.pid}`;
 }

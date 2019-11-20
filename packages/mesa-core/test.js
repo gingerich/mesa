@@ -1,7 +1,7 @@
-const { ServiceBroker, Component } = require('./lib')
+const { ServiceBroker, Component } = require('./lib');
 // import Mesa, { ServiceBroker as Broker } from '@mesa/core'
 
-const broker = new ServiceBroker()
+const broker = new ServiceBroker();
 
 const ops = broker.createService({
   name: 'ops',
@@ -18,19 +18,19 @@ const ops = broker.createService({
   //   sub: () => {}, // .action('sub', () => {})
   //   mult: Multiply.spec() // .action('mult', Multiply.spec())
   // }
-})
+});
 
-broker.createService('math').use('ops', ops) // Problem: ops is "double used"
+broker.createService('math').use('ops', ops); // Problem: ops is "double used"
 
-const add = broker.call.bind(broker, 'math.ops.add')
-const sub = broker.call.bind(broker, 'math.ops.sub')
+const add = broker.call.bind(broker, 'math.ops.add');
+const sub = broker.call.bind(broker, 'math.ops.sub');
 
 async function fn() {
-  aMinusB = await sub({ a: -4, b: 2 })
-  return add({ a: 8, b: aMinusB })
+  aMinusB = await sub({ a: -4, b: 2 });
+  return add({ a: 8, b: aMinusB });
 }
 
-let i = 1000
+let i = 1000;
 while (--i) {
   // fn()
 }
@@ -41,14 +41,14 @@ class Test extends Component {
     return async ctx => {
       return `this is a test: ${ctx.config.foo} ${await ctx.call('test.bar', {
         test: 'test'
-      })}`
-    }
+      })}`;
+    };
   }
 }
 
 test = new ServiceBroker({
   foo: 'bar'
-})
+});
 
 test
   .createService({
@@ -57,46 +57,46 @@ test
   .use((ctx, next) => {
     ctx.configure({
       foo: 'foo'
-    })
-    return next(ctx)
+    });
+    return next(ctx);
   })
   .action('bar', ({ msg }) => `Hello ${msg.test}`)
-  .action('foo', Test.spec({ a: 1 }))
+  .action('foo', Test.spec({ a: 1 }));
 // .event('user.created', UserCreated.spec())
 // .event('.node.*', () => {})
 
-test.call('test.foo').then(console.log.bind(console))
+test.call('test.foo').then(console.log.bind(console));
 
 const cache = opts => service => {
-  const cache = {}
+  const cache = {};
   service.hook('action', async (ctx, next) => {
-    const config = { ...opts, ...ctx.config.cache }
-    const { key } = config
-    let result = cache[key]
+    const config = { ...opts, ...ctx.config.cache };
+    const { key } = config;
+    let result = cache[key];
     if (result === undefined) {
-      result = await next(ctx)
-      cache[key] = result
+      result = await next(ctx);
+      cache[key] = result;
     }
-    return result
-  })
-}
+    return result;
+  });
+};
 
 const m = (ctx, next) => {
-  ctx.hook('action')(next)
-}
+  ctx.hook('action')(next);
+};
 
 class Hook extends Mesa.Component {
   compose() {
-    return (ctx, next) => ctx.hook(this.config.name)(next)
+    return (ctx, next) => ctx.hook(this.config.name)(next);
   }
 }
 
 const transport = Transport.createLayer()
   .protocol('tcp', TCP.transport())
   .transport(({ ingress, egress }) => {
-    ingress.at('tcp://localhost:3000').use(Transport.retries())
-  })
+    ingress.at('tcp://localhost:3000').use(Transport.retries());
+  });
 
-broker.plugin(transport.plugin())
+broker.plugin(transport.plugin());
 
-transport.connect()
+transport.connect();

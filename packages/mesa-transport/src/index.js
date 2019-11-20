@@ -1,15 +1,15 @@
-import Layer from './Layer'
+import Layer from './Layer';
 
 export function createLayer(opts) {
-  return new Layer(opts)
+  return new Layer(opts);
 }
 
 export default {
   createLayer
-}
+};
 
-import * as Serialize from './serializers'
-export { Serialize }
+import * as Serialize from './serializers';
+export { Serialize };
 
 // export { Transport as BaseTransport } from './transport'
-export * from './transports'
+export * from './transports';

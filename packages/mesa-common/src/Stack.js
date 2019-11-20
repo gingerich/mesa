@@ -1,12 +1,12 @@
-import { Component } from '@mesa/component'
+import { Component } from '@mesa/component';
 
 export class Stack extends Component {
   compose(compose) {
-    const { reverse, subcomponents } = this.config
-    const middleware = reverse ? [...subcomponents].reverse() : subcomponents
+    const { reverse, subcomponents } = this.config;
+    const middleware = reverse ? [...subcomponents].reverse() : subcomponents;
 
-    return compose(middleware)
+    return compose(middleware);
   }
 }
 
-export default Stack
+export default Stack;

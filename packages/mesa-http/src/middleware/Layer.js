@@ -1,6 +1,6 @@
-import Mesa from '@mesa/core'
-import Path from './Path'
-import Params from './Params'
+import Mesa from '@mesa/core';
+import Path from './Path';
+import Params from './Params';
 
 export class Layer extends Mesa.Component {
   // get path () {
@@ -8,12 +8,12 @@ export class Layer extends Mesa.Component {
   // }
 
   compose() {
-    const { path, params } = this.config
+    const { path, params } = this.config;
 
     return Path.spec({ path })
       .use(Params.spec({ params }))
-      .use(this.config.subcomponents)
+      .use(this.config.subcomponents);
   }
 }
 
-export default Layer
+export default Layer;

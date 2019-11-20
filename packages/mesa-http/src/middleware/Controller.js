@@ -1,24 +1,24 @@
-import Mesa from '@mesa/core'
-import { Stack } from '@mesa/common'
-import Method from './Method'
+import Mesa from '@mesa/core';
+import { Stack } from '@mesa/common';
+import Method from './Method';
 
-const debug = require('debug')('mesa-http:controller')
+const debug = require('debug')('mesa-http:controller');
 // const route = require('koa-path-match')()
 
 // @path('/:id')
 export class Controller extends Mesa.Component {
   compose() {
     return Method.methods.reduce((stack, method) => {
-      const { [method]: handler } = this.config
+      const { [method]: handler } = this.config;
 
       if (!handler) {
-        return stack
+        return stack;
       }
 
-      const wrapper = ctx => handler.call(this, ctx)
+      const wrapper = ctx => handler.call(this, ctx);
 
-      return stack.use(Method.spec({ method }).use(wrapper))
-    }, Stack.spec())
+      return stack.use(Method.spec({ method }).use(wrapper));
+    }, Stack.spec());
 
     // const controller = this.config.controller || this
     // const path = this.constructor.PATH || this.config.path || '/'
@@ -47,4 +47,4 @@ export class Controller extends Mesa.Component {
   }
 }
 
-export default Controller
+export default Controller;

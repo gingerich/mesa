@@ -1,15 +1,15 @@
-import purpose from 'purposejs'
-import Component from './Component'
-import Spec from './Spec'
+import purpose from 'purposejs';
+import Component from './Component';
+import Spec from './Spec';
 
 /*
-* Reconcile a spec to its functional representation
-* Returns a middleware function composition representative of the given spec
-*/
+ * Reconcile a spec to its functional representation
+ * Returns a middleware function composition representative of the given spec
+ */
 export function compose(root, context) {
   // const decorators = []
   // const config = {}
-  let handler
+  let handler;
 
   // const decorate = data => decorators.map(decorator => decorator(data))
 
@@ -17,8 +17,8 @@ export function compose(root, context) {
 
   return function(data, next) {
     function defer(data) {
-      if (!next) return Promise.resolve(data)
-      return next(data)
+      if (!next) return Promise.resolve(data);
+      return next(data);
     }
 
     if (!handler) {
@@ -29,9 +29,9 @@ export function compose(root, context) {
 
         if (typeof spec === 'function') {
           return function(data, next) {
-            next.defer = defer
-            return Promise.resolve(spec(data, next))
-          }
+            next.defer = defer;
+            return Promise.resolve(spec(data, next));
+          };
         }
 
         // if (typeof spec.type.decorator === 'function') {
@@ -39,26 +39,26 @@ export function compose(root, context) {
         // }
 
         // Use the spec to construct a component instance
-        const component = Spec.make(spec, context)
+        const component = Spec.make(spec, context);
 
         // Ensure a component instance was created
         if (!(component instanceof Component)) {
-          throw new TypeError('Expected spec to generate Component type')
+          throw new TypeError('Expected spec to generate Component type');
         }
 
         // context = component.getChildContext()
 
         // Performs composition on a subcomponent array
         function composeSubcomponents(subcomponents) {
-          return purpose(subcomponents.map(s => innerCompose(s, context)))
+          return purpose(subcomponents.map(s => innerCompose(s, context)));
         }
 
         // Compose this components subcomponents
         function stack() {
-          return composeSubcomponents(component.config.subcomponents)
+          return composeSubcomponents(component.config.subcomponents);
         }
 
-        stack.compose = composeSubcomponents
+        stack.compose = composeSubcomponents;
 
         // stack.configure = function configure(...args) {
         //   Object.assign(config, ...args)
@@ -90,32 +90,32 @@ export function compose(root, context) {
         // component.componentWillMount()
 
         /*
-        * Let the component define its composition by calling its compose() method
-        * The component can optionally call the subcomponents function to produce a function representing its subcomponents
-        * Reduce the result to its functional composition by making a recursive call
-        */
-        const fn = innerCompose(component.compose(stack), context)
+         * Let the component define its composition by calling its compose() method
+         * The component can optionally call the subcomponents function to produce a function representing its subcomponents
+         * Reduce the result to its functional composition by making a recursive call
+         */
+        const fn = innerCompose(component.compose(stack), context);
         // const fn = innerCompose(component.compose(stack()), context)
 
         // Trigger component lifecycle hook
         // component.componentDidMount(parent)
 
         // Ensure function contains reference to the spec that produced it
-        return Object.assign(fn, spec)
+        return Object.assign(fn, spec);
       }
 
-      handler = innerCompose(root, context)
+      handler = innerCompose(root, context);
     }
 
     // decorate(data)
 
-    return handler(data, defer)
-  }
+    return handler(data, defer);
+  };
 
   return {
     execute,
     configure
-  }
+  };
 }
 
-export default compose
+export default compose;

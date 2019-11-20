@@ -1,10 +1,10 @@
-import Connection from './connection'
-export { Connection }
+import Connection from './connection';
+export { Connection };
 
-import Interface from './interface'
-export { Interface }
+import Interface from './interface';
+export { Interface };
 
 export default {
   Connection,
   Interface
-}
+};

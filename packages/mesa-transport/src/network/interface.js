@@ -1,6 +1,6 @@
-import invariant from 'invariant'
-import Connection from './connection'
-import Connector from './connector'
+import invariant from 'invariant';
+import Connection from './connection';
+import Connector from './connector';
 
 export default class Interface extends Connector {
   // static resolve(iface, ...args) {
@@ -10,73 +10,71 @@ export default class Interface extends Connector {
   // }
 
   constructor(parent, connection) {
-    super(connection)
-    this.parent = parent
-    this.connectors = []
-    this.middleware = []
+    super(connection);
+    this.parent = parent;
+    this.connectors = [];
+    this.middleware = [];
   }
 
   get ingress() {
     if (!this._ingress) {
-      this._ingress = new Interface.Ingress(this)
-      this.add(this._ingress)
+      this._ingress = new Interface.Ingress(this);
+      this.add(this._ingress);
     }
 
-    return this._ingress
+    return this._ingress;
   }
 
   get egress() {
     if (!this._egress) {
-      this._egress = new Interface.Egress(this)
-      this.add(this._egress)
+      this._egress = new Interface.Egress(this);
+      this.add(this._egress);
     }
 
-    return this._egress
+    return this._egress;
   }
 
   use(...middleware) {
-    this.middleware = this.middleware.concat(...middleware)
-    return this
+    this.middleware = this.middleware.concat(...middleware);
+    return this;
   }
 
   add(connector) {
     if (typeof connector === 'function') {
-      connector = connector(this)
+      connector = connector(this);
     }
 
-    invariant(connector instanceof Connector, 'expected instance of Connector')
+    invariant(connector instanceof Connector, 'expected instance of Connector');
 
-    this.connectors.push(connector)
+    this.connectors.push(connector);
 
-    return connector
+    return connector;
   }
 
   resolve(connection) {
-    const iface = new Interface(this, connection)
-    iface.use(this.middleware)
+    const iface = new Interface(this, connection);
+    iface.use(this.middleware);
     // Order matters here
     // egress should connect first to ensure service.use() called before ingress can service.call()
-    iface.egress.at(connection).use(this.egress.middleware)
-    iface.ingress.at(connection).use(this.ingress.middleware)
-    return iface
+    iface.egress.at(connection).use(this.egress.middleware);
+    iface.ingress.at(connection).use(this.ingress.middleware);
+    return iface;
   }
 
   at(protocol, ...args) {
-    const connection = Connection.resolve(protocol, ...args)
-    connection.args = args
-    const iface = this.resolve(connection)
-    this.add(iface)
-    return iface
+    const connection = Connection.resolve(protocol, ...args);
+    connection.args = args;
+    const iface = this.resolve(connection);
+    this.add(iface);
+    return iface;
   }
 
   connector(resolve, transit) {
     return service => {
-      return Promise.all(
-        this.connectors.map(c => c.connector(resolve, transit)(service))
-      )
-    }
+      return Promise.all(this.connectors.map(c => c.connector(resolve, transit)(service)));
+    };
   }
 }
 
-Interface.Ingress = require('./ingress')
-Interface.Egress = require('./egress')
+Interface.Ingress = require('./ingress');
+Interface.Egress = require('./egress');

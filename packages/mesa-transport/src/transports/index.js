@@ -1,2 +1,2 @@
-export { BaseTransport } from './base'
-export { PubSubTransport } from './pubsub'
+export { BaseTransport } from './base';
+export { PubSubTransport } from './pubsub';

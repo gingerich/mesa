@@ -1,18 +1,18 @@
-import { Component } from '@mesa/component'
+import { Component } from '@mesa/component';
 
 export function createContext(defaultValue) {
   const context = {
     currentValue: defaultValue,
     defaultValue
-  }
+  };
 
   /*
-  * Ex.
-  * Provider.spec({ value }))
-  *   .use(
-  *     Consumer.spec({ subcomponents: value => () => value })
-  *   )
-  */
+   * Ex.
+   * Provider.spec({ value }))
+   *   .use(
+   *     Consumer.spec({ subcomponents: value => () => value })
+   *   )
+   */
   // class Provider extends Component {
   //   compose (middleware) {
   //     const handler = middleware.compose()
@@ -35,42 +35,42 @@ export function createContext(defaultValue) {
   // }
 
   /*
-  * Ex.
-  * Stack.spec()
-  *   .use(Provider.spec({ value }))
-  *   .use(Consumer.spec({ subcomponents: value => () => value }))
-  */
+   * Ex.
+   * Stack.spec()
+   *   .use(Provider.spec({ value }))
+   *   .use(Consumer.spec({ subcomponents: value => () => value }))
+   */
   class Provider extends Component {
     compose(stack) {
-      const middleware = stack()
+      const middleware = stack();
 
       return async (msg, next) => {
-        const oldValue = context.currentValue
+        const oldValue = context.currentValue;
 
-        context.currentValue = this.config.value
+        context.currentValue = this.config.value;
 
         // const result = await next(msg)
-        const result = await middleware(msg, next)
+        const result = await middleware(msg, next);
 
-        context.currentValue = oldValue
+        context.currentValue = oldValue;
 
-        return result
-      }
+        return result;
+      };
     }
   }
 
   class Consumer extends Component {
     compose() {
-      return this.config.subcomponents(context.currentValue)
+      return this.config.subcomponents(context.currentValue);
     }
   }
 
-  Consumer._context = context
+  Consumer._context = context;
 
   return {
     Provider,
     Consumer
-  }
+  };
 }
 
-export default createContext
+export default createContext;

@@ -1,23 +1,23 @@
-import { compose } from '@mesa/component'
-import memoize from 'mem'
+import { compose } from '@mesa/component';
+import memoize from 'mem';
 
-const mCompose = memoize(compose)
+const mCompose = memoize(compose);
 
 export class Hooks {
   constructor() {
-    this.hooks = {}
+    this.hooks = {};
   }
 
   register(name, component) {
-    const { [name]: hook } = this.hooks
+    const { [name]: hook } = this.hooks;
     if (!hook) {
-      hook = this.hooks[name] = []
+      hook = this.hooks[name] = [];
     }
-    hook.push(component)
+    hook.push(component);
   }
 
   get(name) {
-    const { [name]: hook = [] } = this.hooks
-    return mCompose(hook)
+    const { [name]: hook = [] } = this.hooks;
+    return mCompose(hook);
   }
 }
