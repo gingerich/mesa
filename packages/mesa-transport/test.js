@@ -4,6 +4,7 @@ const { transport: tcp } = require('../mesa-tcp/lib');
 const { transport: mqtt } = require('../mesa-mqtt/lib');
 const { transport: kafka, logLevel } = require('../mesa-kafka/lib');
 const { transport: ssb, generateKey } = require('../mesa-ssb/lib');
+const { transport: gossip } = require('../mesa-gossip/lib');
 
 // const mesh = opts => (connect, layer) => {
 //   layer.protocol('udp', udp())
@@ -21,6 +22,7 @@ const layer = Transport.createLayer()
   .protocol('mqtt', mqtt())
   .protocol('kafka', kafka())
   .protocol('ssb', ssb())
+  .protocol('gossip', gossip())
   .use(Transport.Serialize.JSON());
 
 const transport = layer.transporter(connect => {
@@ -32,24 +34,31 @@ const transport = layer.transporter(connect => {
   //   brokers: ['192.168.99.100:9092'],
   //   logLevel: logLevel.DEBUG
   // })
-  connect.at('ssb', {
-    keys: keys2,
-    connections: {
-      incoming: {
-        net: [
-          {
-            host: 'localhost',
-            port: 8008,
-            scope: 'device',
-            transform: 'shs'
-          }
-        ]
-      }
-    },
-    seeds: [{ host: 'localhost', port: 8009, key: keys.id }],
-    logging: {
-      level: 'info'
-    }
+  // connect.at('ssb', {
+  //   keys: keys2,
+  //   connections: {
+  //     incoming: {
+  //       net: [
+  //         {
+  //           host: 'localhost',
+  //           port: 8008,
+  //           scope: 'device',
+  //           transform: 'shs'
+  //         }
+  //       ]
+  //     }
+  //   },
+  //   seeds: [{ host: 'localhost', port: 8009, key: keys.id }],
+  //   logging: {
+  //     level: 'info'
+  //   }
+  // })
+  connect.at('gossip', {
+    name: 'test',
+    host: '127.0.0.1',
+    hashring: { host: '127.0.0.1', port: 7778 },
+    base: ['127.0.0.1:7779'],
+    logLevel: 'error'
   });
 });
 
@@ -79,24 +88,31 @@ const otherTransport = layer.transporter(connect => {
   //   brokers: ['192.168.99.100:9092'],
   //   logLevel: logLevel.DEBUG
   // })
-  connect.at('ssb', {
-    keys,
-    connections: {
-      incoming: {
-        net: [
-          {
-            host: 'localhost',
-            port: 8009,
-            scope: 'device',
-            transform: 'shs'
-          }
-        ]
-      }
-    },
-    seeds: [{ host: 'localhost', port: 8008, key: keys2.id }],
-    logging: {
-      level: 'info'
-    }
+  // connect.at('ssb', {
+  //   keys,
+  //   connections: {
+  //     incoming: {
+  //       net: [
+  //         {
+  //           host: 'localhost',
+  //           port: 8009,
+  //           scope: 'device',
+  //           transform: 'shs'
+  //         }
+  //       ]
+  //     }
+  //   },
+  //   seeds: [{ host: 'localhost', port: 8008, key: keys2.id }],
+  //   logging: {
+  //     level: 'info'
+  //   }
+  // })
+  connect.at('gossip', {
+    logLevel: 'error',
+    host: '127.0.0.1',
+    name: 'test',
+    hashring: { host: '127.0.0.1', port: 7779 },
+    base: ['127.0.0.1:7778']
   });
 });
 Mesa.createService('other')

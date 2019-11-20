@@ -33,8 +33,8 @@ export default class Transport extends PubSubTransport {
         topic,
         data: packet.payload.toString()
       };
-      this.instance.pubsub.emit(msg, (err, result) => {
-        console.log('PUBLISHED', err, result);
+      this.instance.pubsub.emit(msg, err => {
+        if (err) return reject(err);
         resolve();
       });
     });

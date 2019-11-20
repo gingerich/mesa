@@ -12,7 +12,7 @@ export default class Transporter extends EventEmitter {
 
       // only enforce immutability in dev?
       // required for effective memoization
-      Object.freeze(connection);
+      // Object.freeze(connection)
 
       return transport(connection, transit);
     };
