@@ -7,8 +7,9 @@ function getOrderedEntries(obj) {
 }
 
 class Node {
-  constructor(value) {
+  constructor(value, pattern) {
     this.value = value;
+    this.pattern = pattern;
   }
 }
 
@@ -34,6 +35,11 @@ class Matchbox {
   get(pattern) {
     const key = JSON.stringify(pattern);
     return this.nodes.get(key);
+  }
+
+  has(pattern) {
+    const key = JSON.stringify(pattern);
+    return this.nodes.has(key);
   }
 
   remove(pattern) {

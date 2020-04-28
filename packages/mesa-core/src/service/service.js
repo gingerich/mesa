@@ -63,7 +63,7 @@ export class Service {
   }
 
   action(pattern, component, options) {
-    this.namespace.action(pattern, component, options);
+    this.namespace.register(pattern, component, options);
     return this;
   }
 
@@ -74,19 +74,10 @@ export class Service {
     return this._handler(ctx, next);
   }
 
-  call(action, msg, opts) {
-    const parts = [action];
+  call(...args) {
+    const [parts, opts] = normalizeArguments(...args);
 
-    if (typeof action === 'object' && opts === undefined) {
-      opts = msg;
-      msg = null;
-    }
-
-    if (msg !== null) {
-      parts.push(msg);
-    }
-
-    const message = Message.from(...parts);
+    const message = Message.from(parts);
 
     const ctx = this.createContext(message, opts);
 
@@ -94,11 +85,27 @@ export class Service {
   }
 
   emit(...args) {
-    const message = Message.from(...args);
+    const [parts, opts] = normalizeArguments(...args);
 
-    const ctx = this.createContext(message, { cmd: 'event' });
+    const message = Message.from(parts);
+
+    const ctx = this.createContext(message, { cmd: 'emit', ...opts });
 
     return this.handle(ctx);
+    const handler = this.handle;
+    return ctx => {
+      return handler(ctx, defaultHandler).catch(err => {
+        if (err instanceof Error.ActionNotFoundError) {
+          return;
+        }
+        throw err;
+      });
+    };
+  }
+
+  proxy(ctx, opts = {}) {
+    opts.ctx = ctx;
+    return this.call(ctx.msg, null, opts);
   }
 
   /*
@@ -109,6 +116,7 @@ export class Service {
     if (opts.ctx) {
       const ctx = opts.ctx;
       ctx.msg = message.body;
+      // ctx.service = this
       return ctx;
     }
 
@@ -131,4 +139,25 @@ export class Service {
   onActionRemoved(listener) {
     this.events.on('action:remove', listener);
   }
+}
+
+function normalizeArguments(action, msg, opts) {
+  const parts = [action];
+
+  if (typeof action === 'object' && opts === undefined) {
+    opts = msg;
+    msg = null;
+  }
+
+  // return [action, msg, opts];
+
+  if (msg !== null) {
+    parts.push(msg);
+  }
+
+  return [parts, opts];
+
+  // parts.push(opts);
+
+  // return parts;
 }

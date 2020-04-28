@@ -29,11 +29,14 @@ class Egress extends Interface {
           err instanceof Errors.ActionNotFoundError
           // ctx.nodeId === transit.nodeId
         ) {
-          return egressService.call(ctx.msg, null, { ctx });
+          return egressService.proxy(ctx);
         }
 
         throw err;
       });
+
+      // const { protocol } = this.connection;
+      // service.ns('transport').action(protocol, ctx => egressService.proxy(ctx));
 
       service.use(egressFallback);
 

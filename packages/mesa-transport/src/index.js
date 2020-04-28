@@ -8,6 +8,8 @@ export default {
   createLayer
 };
 
+export { default as Packet } from './packet';
+
 import * as Serialize from './serializers';
 export { Serialize };
 

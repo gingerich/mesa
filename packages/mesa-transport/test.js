@@ -5,6 +5,7 @@ const { transport: mqtt } = require('../mesa-mqtt/lib');
 const { transport: kafka, logLevel } = require('../mesa-kafka/lib');
 const { transport: ssb, generateKey } = require('../mesa-ssb/lib');
 const { transport: gossip } = require('../mesa-gossip/lib');
+const { create: createMesh } = require('../mesa-mesh');
 
 // const mesh = opts => (connect, layer) => {
 //   layer.protocol('udp', udp())
@@ -18,17 +19,17 @@ const keys = generateKey();
 const keys2 = generateKey();
 
 const layer = Transport.createLayer()
-  .protocol('tcp', tcp())
-  .protocol('mqtt', mqtt())
-  .protocol('kafka', kafka())
-  .protocol('ssb', ssb())
-  .protocol('gossip', gossip())
-  .use(Transport.Serialize.JSON());
+  .use('tcp', tcp())
+  .use('mqtt', mqtt())
+  .use('kafka', kafka())
+  .use('ssb', ssb())
+  .use('gossip', gossip())
+  .plugin(Transport.Serialize.JSON());
 
 const transport = layer.transporter(connect => {
   // connect.ingress.at('tcp')
   // connect.egress.at('tcp://localhost:3001').action({ test: true })
-  // connect.at('mqtt://localhost:1883', { debug: true })
+  // connect.at('mqtt://localhost:1883', { debug: true });
   // connect.at({
   //   scheme: 'kafka',
   //   brokers: ['192.168.99.100:9092'],
@@ -53,23 +54,50 @@ const transport = layer.transporter(connect => {
   //     level: 'info'
   //   }
   // })
-  connect.at('gossip', {
+  // connect.at('gossip', {
+  //   name: 'test',
+  //   host: '127.0.0.1',
+  //   hashring: { host: '127.0.0.1', port: 7778 },
+  //   base: ['127.0.0.1:7779'],
+  //   logLevel: 'error'
+  // });
+});
+
+const dataTransport = Transport.createLayer()
+  .use('mqtt', mqtt())
+  .plugin(Transport.Serialize.JSON())
+  .plugin(connect => {
+    connect.at('mqtt://localhost:1883', { debug: true });
+  });
+
+const mesh = createMesh({
+  dataTransport,
+  gossip: {
     name: 'test',
     host: '127.0.0.1',
     hashring: { host: '127.0.0.1', port: 7778 },
     base: ['127.0.0.1:7779'],
     logLevel: 'error'
-  });
+  }
 });
 
-const service = Mesa.createService('test').plugin(transport.plugin({ nodeId: 'test' }));
+const service = Mesa.createService('test');
+service.plugin(mesh.createPlugin());
+// service.plugin(transport.plugin({ nodeId: 'test' }));
 service.action(
   { test: 123 },
-  async ctx =>
-    `remote: ${await ctx.call({ test: true }, null, {
-      fallback: 'welp!',
-      nodeId: 'other'
-    })}`,
+  async ctx => {
+    const remoteResult = await ctx.call(
+      'other.',
+      { test: true },
+      {
+        fallback: 'welp!'
+        // nodeId: 'other'
+      }
+    );
+    console.log('HERE!!!', remoteResult);
+    return `remote: ${remoteResult}`;
+  },
   {
     fallback(ctx) {
       return 'this is fun!';
@@ -83,6 +111,7 @@ service.action(
 
 const otherTransport = layer.transporter(connect => {
   // connect.ingress.at('tcp://localhost:3001')
+  // connect.at('mqtt://localhost:1883', { debug: true });
   // connect.at({
   //   scheme: 'kafka',
   //   brokers: ['192.168.99.100:9092'],
@@ -107,36 +136,55 @@ const otherTransport = layer.transporter(connect => {
   //     level: 'info'
   //   }
   // })
-  connect.at('gossip', {
-    logLevel: 'error',
-    host: '127.0.0.1',
+  // connect.at('gossip', {
+  //   logLevel: 'error',
+  //   host: '127.0.0.1',
+  //   name: 'test',
+  //   hashring: { host: '127.0.0.1', port: 7779 },
+  //   base: ['127.0.0.1:7778']
+  // });
+});
+
+const mesh2 = createMesh({
+  dataTransport,
+  gossip: {
     name: 'test',
+    host: '127.0.0.1',
     hashring: { host: '127.0.0.1', port: 7779 },
-    base: ['127.0.0.1:7778']
-  });
+    base: ['127.0.0.1:7778'],
+    logLevel: 'error'
+  }
 });
 Mesa.createService('other')
-  .plugin(otherTransport.plugin({ nodeId: 'other' }))
+  .plugin(mesh2.createPlugin())
+  // .plugin(otherTransport.plugin({ nodeId: 'other' }))
   .action({ test: true }, ctx => `remote RESPONSE!!`);
 
-const p = otherTransport.connect().then(() => console.log('other service connected!'));
+// const p = otherTransport.connect().then(() => console.log('other service connected!'));
+const p = mesh2.transporter.connect().then(() => console.log('mesh2 connected'));
 
 transport.on('error', err => console.error('bad', err));
 transport.on('listening', r => console.log('listening', r));
 
-transport
+mesh.transporter
+  // transport
   .connect()
   .then(() => p)
   .then(() => {
     console.log('connected!');
-  })
+  }, console.error.bind(console))
   .then(() => {
-    service.call({ test: 123 }).then(
-      result => {
-        console.log('RESULT', result);
-      },
-      err => console.error('bad', err)
-    );
+    setTimeout(() => {
+      service.call({ test: 123 }).then(
+        result => {
+          console.log('RESULT', result);
+        },
+        err => console.error('bad', err)
+      );
+    }, 2000);
+  })
+  .catch(err => {
+    console.error(err);
   });
 
 // service.call({ test: 123 }).then(

@@ -6,15 +6,18 @@ import { Transit } from './transit';
 export default class Transporter extends EventEmitter {
   static getResolver(layer, transit) {
     return connection => {
-      const transport = layer.transports[connection.scheme];
+      const connect = layer.transports[connection.scheme];
 
-      invariant(transport, `No protocol definition for ${connection.scheme}`);
+      invariant(!!connect, `No protocol definition for ${connection.scheme}`);
 
       // only enforce immutability in dev?
       // required for effective memoization
       // Object.freeze(connection)
 
-      return transport(connection, transit);
+      // Future Improvement
+      // currently expects transport to connect and initialize in this function
+      // could return an object with connect method
+      return connect(connection, transit);
     };
   }
 
@@ -24,7 +27,7 @@ export default class Transporter extends EventEmitter {
     this.interface = iface;
   }
 
-  plugin(opts) {
+  createPlugin(opts) {
     return service => {
       // memoize resolver to use same transport instance per unique connection
       const transit = new Transit(this, service, opts);
@@ -35,7 +38,7 @@ export default class Transporter extends EventEmitter {
         const connected = connect(service, options);
 
         Promise.resolve(connected).then(
-          connections => this.emit('connected', connections),
+          connections => this.emit('connected', transit, connections),
           error => this.emit('error', error)
         );
       });

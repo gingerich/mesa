@@ -7,6 +7,9 @@ export class Message {
     if (args[0] instanceof Message) {
       return args[0];
     }
+    if (Array.isArray(args[0])) {
+      args = args[0];
+    }
     return Message.parse(...args);
   }
 

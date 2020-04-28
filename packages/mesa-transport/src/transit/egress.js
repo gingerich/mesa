@@ -26,23 +26,19 @@ export class EgressHandler {
   }
 
   packetFromContext(ctx) {
-    const type = ctx.cmd === 'event' ? Packet.PACKET_EVENT : Packet.PACKET_REQUEST;
-
+    const type = getPacketType(ctx.cmd);
     const target = ctx.nodeId;
+    const payload = {
+      id: ctx.id,
+      rid: uuid(),
+      pid: ctx.request && ctx.request.id,
+      origin: this.transit.nodeId,
+      data: ctx.msg,
+      meta: ctx.meta,
+      v: this.transit.PROTOCOL_VERSION
+    };
 
-    return Packet.create(
-      type,
-      {
-        id: ctx.id,
-        rid: uuid(),
-        pid: ctx.request && ctx.request.id,
-        origin: this.transit.nodeId,
-        data: ctx.msg,
-        meta: ctx.meta,
-        v: this.transit.PROTOCOL_VERSION
-      },
-      target
-    );
+    return Packet.create(type, payload, target);
   }
 
   makeRequest(ctx) {
@@ -59,4 +55,12 @@ export class EgressHandler {
   abortRequest(ctx) {
     this.transit.pendingRequests.delete(ctx.id);
   }
+}
+
+function getPacketType(cmd) {
+  // return ctx.type;
+  if ('emit' === cmd) {
+    return Packet.PACKET_EVENT;
+  }
+  return Packet.PACKET_REQUEST;
 }

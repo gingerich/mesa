@@ -1,5 +1,5 @@
 import { once } from 'events';
-import { PubSubTransport } from '@mesa/transport';
+import { PubSubTransport, Packet } from '@mesa/transport';
 
 export default class Transport extends PubSubTransport {
   init(instance, connection) {
@@ -33,6 +33,23 @@ export default class Transport extends PubSubTransport {
         topic,
         data: packet.payload.toString()
       };
+      // if (!Packet.isRequest(packet)) {
+      //   console.log('fire', {
+      //     key: this.transit.nodeId,
+      //     data: packet.payload.toString()
+      //   });
+      //   this.instance.fire(
+      //     {
+      //       key: this.transit.nodeId,
+      //       data: packet.payload.toString()
+      //     },
+      //     err => {
+      //       if (err) return reject(err);
+      //       resolve();
+      //     }
+      //   );
+      //   return;
+      // }
       this.instance.pubsub.emit(msg, err => {
         if (err) return reject(err);
         resolve();

@@ -10,6 +10,12 @@ export class IngressHandler {
     return (ctx, next) => {
       this.assertProtocolVersionMatch(ctx.packet);
 
+      // Ignore any packets originating from this service
+      if (ctx.packet.payload.origin === this.transit.nodeId) {
+        console.log('Ignoring own packet', ctx.packet.type);
+        return;
+      }
+
       if (Packet.isResponse(ctx.packet)) {
         this.handleResponse(ctx.packet);
         return;
@@ -23,6 +29,9 @@ export class IngressHandler {
       if (Packet.isRequest(ctx.packet)) {
         return this.handleRequest(ctx, next);
       }
+
+      // Let downstream middleware handle unrecognized packet types
+      return next(ctx);
     };
   }
 

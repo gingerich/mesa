@@ -4,7 +4,10 @@ import Packet from '../packet';
 const defaultOptions = {
   topicPrefix: 'MESA',
   topicNameDelimiter: '.',
-  topicTypes: [Packet.PACKET_REQUEST, Packet.PACKET_RESPONSE]
+  topics: id => [
+    { id, type: Packet.PACKET_REQUEST },
+    { id, type: Packet.PACKET_RESPONSE }
+  ]
 };
 
 export class PubSubTransport extends BaseTransport {
@@ -31,10 +34,12 @@ export class PubSubTransport extends BaseTransport {
       return [connectionTopic];
     }
 
+    return this.options.topics(this.transit.nodeId);
+
     const { topicTypes } = this.options;
-    const { serviceName } = this.connection;
-    const mesaTopic = serviceName || this.transit.service.name;
-    return topicTypes.map(type => ({ id: mesaTopic, type }));
+    // const { serviceName } = this.connection;
+    // const mesaTopic = serviceName || this.transit.service.name;
+    return topicTypes.map(type => ({ id: this.transit.nodeId, type }));
   }
 
   subscribeToTopics() {

@@ -2,7 +2,7 @@ import { uuid } from '@mesa/util';
 
 const baseContext = {
   // cmd: 'REQUEST',
-  call(action, msg, opts = {}) {
+  call(action, msg, opts) {
     opts.cmd = 'REQUEST';
     return this.service.call(action, msg, opts);
   },
@@ -33,7 +33,7 @@ const baseContext = {
 };
 
 export const create = (service, msg, extendedContext, opts) => {
-  const context = Object.create({ ...baseContext, ...extendedContext });
+  const context = Object.create(Object.assign(baseContext, extendedContext));
   context.config = Object.create(service.config);
   context.service = service;
   context.msg = msg;

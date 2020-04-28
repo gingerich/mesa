@@ -1,0 +1,28 @@
+{
+  "name": "@mesa/mesh",
+  "version": "0.0.1",
+  "description": "Mesa service mesh",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "npm run clean && babel src -d lib",
+    "clean": "rm -rf lib",
+    "lint": "eslint src --fix",
+    "test": "jest",
+    "test-cov": "npm run test -- --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/gingerich/mesa/packages/mesa-mesh"
+  },
+  "keywords": [
+    "service",
+    "mesh"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@mesa/core": "^0.0.0",
+    "@mesa/gossip": "^0.0.1"
+  }
+}

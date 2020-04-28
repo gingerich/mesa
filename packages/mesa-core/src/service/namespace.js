@@ -31,7 +31,7 @@ export class Namespace {
     return this;
   }
 
-  action(pattern, component, options) {
+  register(pattern, component, options) {
     if (typeof pattern === 'string') {
       pattern = { act: pattern };
     }
@@ -42,6 +42,19 @@ export class Namespace {
     defineHandler(this.registry, pattern, component, options);
 
     return this;
+  }
+
+  unregister(pattern, component) {
+    if (!component) {
+      this.registry.remove(pattern);
+      return;
+    }
+    // remove specific component
+    throw new Error('TODO');
+  }
+
+  has(pattern) {
+    return this.registry.has(pattern);
   }
 
   ns(pattern, options = {}) {
