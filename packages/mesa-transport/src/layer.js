@@ -22,7 +22,7 @@ export default class Layer {
     return this;
   }
 
-  transporter(init) {
+  transporter(init = () => {}) {
     const connect = new Network.Interface();
 
     // connect.use((ctx, next) => {

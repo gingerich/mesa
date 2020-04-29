@@ -1,29 +1,9 @@
-import { Service } from '@mesa/core';
+import EventEmitter from 'eventemitter3';
+import { Service, ServiceBroker } from '@mesa/core';
 import Transport, { Serialize } from '@mesa/transport';
 import { transport as gossip } from '@mesa/gossip';
 import { MeshTransport } from './transport';
 import Packet from './packet';
-
-const controlTransport = Transport.createLayer()
-  .use(
-    'gossip',
-    gossip({
-      topicTypes: [Packet.PACKET_UP, Packet.PACKET_DOWN],
-      topics: () => [{ type: Packet.PACKET_UP }, { type: Packet.PACKET_DOWN }]
-    })
-  )
-  .plugin(Serialize.JSON())
-  .plugin(connect => {
-    connect.egress.use((ctx, next) => {
-      if ('up' === ctx.cmd) {
-        ctx.packet.type = Packet.PACKET_UP;
-      }
-      if ('down' === ctx.cmd) {
-        ctx.packet.type = Packet.PACKET_DOWN;
-      }
-      return next(ctx);
-    });
-  });
 
 export const create = (opts = {}) => {
   const transporter = Transport.createLayer()
@@ -41,90 +21,239 @@ export const create = (opts = {}) => {
 
 export const transport = opts => {
   return ({ ...connection }, transit) => {
-    const nodeId = `mesh:control//${transit.nodeId}`;
+    const transport = new MeshTransport(transit, opts);
 
-    const egressService = Service.create({ name: 'egress' });
-    const ingressService = Service.create({ name: 'ingress' });
-    const registryService = Service.create({ name: 'registry' });
+    const mesh = new Mesh(transit, opts);
 
-    const dataPlane = opts.dataTransport.transporter(connect => {
-      connect.connectors[2].ingress.use((ctx, next) => {
-        console.log('MESH INGRESS', ctx.packet.payload);
-        // if (Packet.isResponse(ctx.packet)) {
-        //   return next(ctx);
-        // }
-        next(ctx);
-        return ingressService.proxy(ctx);
-      });
+    transport.init(mesh);
+
+    return transport;
+  };
+};
+
+class MeshClient extends EventEmitter {
+  constructor(ingress, egress) {
+    super();
+    this.ingress = ingress;
+    this.egress = egress;
+  }
+}
+
+class Mesh {
+  constructor(transit, opts) {
+    this.transit = transit;
+
+    this.meshId = `mesh::${this.transit.nodeId}`;
+
+    this.controller = new MeshController(this, opts);
+
+    this.ingress = new MeshIngress(Service.create({ name: 'ingress' }));
+
+    this.dataPlane = opts.dataTransport.transporter(connect => {
+      connect.connectors[2].ingress.use(this.ingress.getHandler());
     });
 
-    egressService.plugin(dataPlane.createPlugin({ nodeId }));
+    const egressService = Service.create({ name: 'egress' });
+    egressService.plugin(this.dataPlane.createPlugin({ nodeId: this.meshId }));
 
-    const proxyMiddleware = ctx => egressService.proxy(ctx);
+    this.egress = new MeshEgress(egressService);
+  }
 
-    const onServiceDiscovered = (nodeId, { actions, ns }) => {
-      const { registry } = registryService.namespace;
-      if (registry.has(ns) || registry.has({ ns })) {
-        console.log(`Received service discovery for known service ${ns}`);
-        return;
-      }
+  connect(opts) {
+    this.controller.discovery.on('service:up', (nodeId, { ns, actions }) => {
+      const serviceDescriptor = new ServiceDescriptor(ns, actions);
+      this.egress.serviceProxy.addRemoteService(nodeId, serviceDescriptor);
+    });
 
-      console.log('SERVICE DISCOVERED', nodeId, actions, ns);
-      const namespace = registryService.namespace.ns(ns);
-      actions.forEach(action => {
-        namespace.register(action, ctx => {
-          ctx.nodeId = nodeId;
-          console.log('MESH EGRESS', ctx.msg);
-          return proxyMiddleware(ctx);
-        });
+    this.controller.discovery.on('service:down', nodeId => {
+      this.egress.serviceProxy.removeRemoteService(nodeId);
+    });
+
+    this.transit.transporter.once('connected', () => {
+      this.controller.discovery.publishService(this.transit.service);
+    });
+
+    const ingressService = this.ingress.getService();
+    const egressService = this.egress.getService();
+
+    const client = new MeshClient(ingressService, egressService);
+
+    const connect = async () => {
+      await this.dataPlane.connect(opts);
+      await this.controller.connect(opts);
+      client.emit('connected');
+    };
+
+    connect();
+
+    return client;
+  }
+}
+
+class ServiceDiscovery {
+  constructor(controller, mesh) {
+    this.controller = controller;
+    this.mesh = mesh;
+    this.emitter = new EventEmitter();
+  }
+
+  publishService(service) {
+    const { registry } = service.namespace;
+    const actions = Array.from(registry.nodes.values()).map(node => node.pattern);
+    const ns = service.name;
+    this.controller.service.call({ ns, actions }, null, { cmd: 'up' });
+  }
+
+  unpublishService(service) {
+    this.controller.service.call(service.name, null, { cmd: 'down' });
+  }
+
+  on(event, listener) {
+    this.emitter.on(event, listener);
+    return () => this.emitter.off(event, listener);
+  }
+
+  getTransportPlugin(opts = {}) {
+    return connect => {
+      connect.egress.use((ctx, next) => {
+        if ('up' === ctx.cmd) {
+          ctx.packet.type = Packet.PACKET_UP;
+        }
+        if ('down' === ctx.cmd) {
+          ctx.packet.type = Packet.PACKET_DOWN;
+        }
+        return next(ctx);
       });
-    };
 
-    const onServiceOffline = ns => {
-      registryService.namespace.unregister(ns);
-    };
+      const gossip = connect.at('gossip', opts.gossip);
 
-    const controlPlane = controlTransport.transporter(connect => {
-      const iface = connect.at('gossip', opts.gossip);
-      iface.ingress.use((ctx, next) => {
+      gossip.ingress.use((ctx, next) => {
         const { payload } = ctx.packet;
-        if (payload.origin === nodeId) {
+        if (payload.origin === this.mesh.meshId) {
           return;
         }
 
         if (Packet.isUp(ctx.packet)) {
-          onServiceDiscovered(payload.origin, payload.data);
+          this.emitter.emit('service:up', payload.origin, payload.data);
           return;
         }
 
         if (Packet.isDown(ctx.packet)) {
-          onServiceOffline(payload.data.ns);
+          this.emitter.emit('service:down', payload.origin);
           return;
         }
 
         return next(ctx);
       });
-      // iface.egress.use((ctx, next) => {
-      //   console.log('sdgadgfdg', ctx);
-      //   return next(ctx);
-      // });
-    });
-
-    const controlService = Service.create({ name: 'control' });
-    controlService.plugin(controlPlane.createPlugin({ nodeId }));
-
-    const mesh = {
-      ingress: ingressService,
-      egress: registryService, // egressService,
-      control: controlService
     };
+  }
+}
 
-    const connected = dataPlane.connect().then(() => controlPlane.connect());
+class MeshIngress {
+  constructor(service) {
+    this.service = service;
+  }
 
-    const transport = new MeshTransport(transit, opts);
+  getService() {
+    return this.service;
+  }
 
-    transport.init(mesh, connected);
+  getHandler() {
+    return (ctx, next) => {
+      console.log('MESH INGRESS', ctx.packet.payload);
+      next(ctx);
+      return this.service.proxy(ctx);
+    };
+  }
+}
 
-    return transport;
-  };
-};
+class MeshEgress {
+  constructor(egressService) {
+    this.egressService = egressService;
+    this.broker = new ServiceBroker();
+    this.serviceProxy = new RemoteServiceProxy(this);
+  }
+
+  getService() {
+    return this.broker.service;
+  }
+
+  getHandler(nodeId) {
+    return ctx => this.egressService.proxy(ctx, { nodeId });
+  }
+}
+
+class MeshController {
+  constructor(mesh, opts = {}) {
+    this.mesh = mesh;
+    this.discovery = new ServiceDiscovery(this, this.mesh);
+    this.service = Service.create({ name: 'control' });
+    this.transport = Transport.createLayer()
+      .use(
+        'gossip',
+        gossip({
+          topicTypes: [Packet.PACKET_UP, Packet.PACKET_DOWN],
+          topics: () => [{ type: Packet.PACKET_UP }, { type: Packet.PACKET_DOWN }]
+        })
+      )
+      .plugin(Serialize.JSON())
+      .plugin(this.discovery.getTransportPlugin(opts.discovery));
+  }
+
+  connect() {
+    const controlPlane = this.transport.transporter();
+
+    const controlPlanePlugin = controlPlane.createPlugin({ nodeId: this.mesh.meshId });
+
+    this.service.plugin(controlPlanePlugin);
+
+    return controlPlane.connect();
+  }
+}
+
+class RemoteServiceProxy {
+  constructor(egress) {
+    this.egress = egress;
+    this.registry = {};
+  }
+
+  addRemoteService(nodeId, { actions, ns }) {
+    const broker = this.egress.broker;
+
+    if (broker.namespace.registry.has(ns) || broker.namespace.registry.has({ ns })) {
+      console.log(`Received service discovery for known service ${ns}`);
+      return;
+    }
+
+    console.log('SERVICE DISCOVERED', nodeId, actions, ns);
+
+    const remoteService = broker.createService({ name: ns });
+
+    this.registry[nodeId] = remoteService;
+
+    const remoteActionHandler = this.egress.getHandler(nodeId);
+
+    actions.forEach(action => {
+      remoteService.action(action, remoteActionHandler);
+    });
+  }
+
+  removeRemoteService(ns) {
+    this.egress.broker.namespace.unregister(ns);
+  }
+
+  // TODO: remove by nodeId instead?
+  _removeRemoteService(nodeId) {
+    const service = this.registry[nodeId];
+    this.egress.broker.removeService(service);
+    // how do we handle broker.service.call caching the composed handler?
+    // actually namespace should handle it fine except the memoized matching
+  }
+}
+
+class ServiceDescriptor {
+  constructor(ns, actions) {
+    this.ns = ns;
+    this.actions = actions;
+  }
+}

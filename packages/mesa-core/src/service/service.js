@@ -115,8 +115,12 @@ export class Service {
   createContext(message, opts = {}) {
     if (opts.ctx) {
       const ctx = opts.ctx;
+      if (opts.nodeId) {
+        ctx.nodeId = opts.nodeId;
+      }
       ctx.msg = message.body;
       // ctx.service = this
+      // TODO? respect same opts as Context.create
       return ctx;
     }
 

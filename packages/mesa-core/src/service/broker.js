@@ -44,6 +44,8 @@ export class ServiceBroker {
     return service;
   }
 
+  // TODO removeService(service)
+
   getService(schema) {
     return this.registry.get(schema);
   }

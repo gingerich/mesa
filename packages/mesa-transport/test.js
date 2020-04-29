@@ -72,12 +72,14 @@ const dataTransport = Transport.createLayer()
 
 const mesh = createMesh({
   dataTransport,
-  gossip: {
-    name: 'test',
-    host: '127.0.0.1',
-    hashring: { host: '127.0.0.1', port: 7778 },
-    base: ['127.0.0.1:7779'],
-    logLevel: 'error'
+  discovery: {
+    gossip: {
+      name: 'test',
+      host: '127.0.0.1',
+      hashring: { host: '127.0.0.1', port: 7778 },
+      base: ['127.0.0.1:7779'],
+      logLevel: 'error'
+    }
   }
 });
 
@@ -147,12 +149,14 @@ const otherTransport = layer.transporter(connect => {
 
 const mesh2 = createMesh({
   dataTransport,
-  gossip: {
-    name: 'test',
-    host: '127.0.0.1',
-    hashring: { host: '127.0.0.1', port: 7779 },
-    base: ['127.0.0.1:7778'],
-    logLevel: 'error'
+  discovery: {
+    gossip: {
+      name: 'test',
+      host: '127.0.0.1',
+      hashring: { host: '127.0.0.1', port: 7779 },
+      base: ['127.0.0.1:7778'],
+      logLevel: 'error'
+    }
   }
 });
 Mesa.createService('other')
