@@ -3,8 +3,7 @@ import { BaseTransport } from '@mesa/transport';
 
 export class MeshTransport extends BaseTransport {
   init(mesh) {
-    // this.mesh = mesh;
-    this.meshClient = mesh.connect();
+    this.meshClient = mesh.connect(this.options);
     this.connected = once(this.meshClient, 'connected');
   }
 

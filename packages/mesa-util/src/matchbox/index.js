@@ -37,6 +37,10 @@ class Matchbox {
     return this.nodes.get(key);
   }
 
+  getPatterns() {
+    return Array.from(this.nodes.values()).map(node => node.pattern);
+  }
+
   has(pattern) {
     const key = JSON.stringify(pattern);
     return this.nodes.has(key);
