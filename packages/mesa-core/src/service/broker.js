@@ -41,10 +41,14 @@ export class ServiceBroker {
     const namespace = this.namespace.ns(schema.name);
     const service = new ServiceFactory(namespace, schema);
     this.registry.add(service.schema, service);
+    this.namespace.flushCache();
     return service;
   }
 
-  // TODO removeService(service)
+  removeService(service) {
+    this.namespace.unregister({ ns: service.name });
+    this.namespace.flushCache();
+  }
 
   getService(schema) {
     return this.registry.get(schema);

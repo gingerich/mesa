@@ -1,5 +1,5 @@
 import memoize from 'fast-memoize';
-import { matchbox } from '@mesa/util';
+import { matchbox, uuid } from '@mesa/util';
 import { Service } from './service';
 import { Stack } from '../components/common';
 import { Container, Actions, Router } from '../components';
@@ -15,6 +15,7 @@ export class Namespace {
     this.options = { ...defaultOptions, ...options };
     this.registry = matchbox(options.match);
     this.container = Container.spec();
+    this.cacheId = uuid();
   }
 
   use(ns, component) {
@@ -77,8 +78,18 @@ export class Namespace {
     return this.registry.match(pattern, strict);
   }
 
+  flushCache() {
+    this.cacheId = uuid();
+  }
+
   router(options = this.options.router) {
-    const match = memoize(msg => this.match(msg));
+    const memMatch = memoize(
+      // including second argument tells memoize to treat as multi-argument function (fn.length > 1)
+      (msg, cacheId) => this.match(msg)
+    );
+
+    const match = msg => memMatch(msg, this.cacheId);
+
     const config = { match, ...options };
 
     return Stack.spec()
