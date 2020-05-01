@@ -26,7 +26,7 @@ export default class Layer {
     const connect = new Network.Interface();
 
     // connect.use((ctx, next) => {
-    //   if ('emit' === ctx.cmd) {
+    //   if ('emit' === ctx.type) {
     //     ctx.type = Packet.PACKET_EVENT;
     //   } else {
     //     ctx.type = Packet.PACKET_REQUEST;

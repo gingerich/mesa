@@ -26,7 +26,7 @@ export class EgressHandler {
   }
 
   packetFromContext(ctx) {
-    const type = getPacketType(ctx.cmd);
+    const type = getPacketType(ctx.type);
     const target = ctx.nodeId;
     const payload = {
       id: ctx.id,
@@ -57,9 +57,9 @@ export class EgressHandler {
   }
 }
 
-function getPacketType(cmd) {
+function getPacketType(type) {
   // return ctx.type;
-  if ('emit' === cmd) {
+  if ('emit' === type) {
     return Packet.PACKET_EVENT;
   }
   return Packet.PACKET_REQUEST;

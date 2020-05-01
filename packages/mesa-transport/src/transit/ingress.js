@@ -77,7 +77,7 @@ export class IngressHandler {
   }
 
   handleEvent(ctx, next) {
-    ctx.cmd = 'event';
+    ctx.type = 'event';
     next(ctx);
   }
 

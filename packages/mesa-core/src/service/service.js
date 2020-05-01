@@ -89,7 +89,7 @@ export class Service {
 
     const message = Message.from(parts);
 
-    const ctx = this.createContext(message, { cmd: 'emit', ...opts });
+    const ctx = this.createContext(message, { type: 'emit', ...opts });
 
     return this.handle(ctx);
     const handler = this.handle;
