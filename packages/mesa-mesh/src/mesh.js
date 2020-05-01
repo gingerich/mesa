@@ -1,9 +1,6 @@
 import EventEmitter from 'eventemitter3';
-import { Service } from '@mesa/core';
-import MeshController from './controller';
-import MeshEgress from './egress';
-import MeshIngress from './ingress';
-import RemoteServiceProxy from './service-proxy';
+import { MeshController } from './controller';
+import { ServiceProxy } from './proxy';
 
 export default class Mesh {
   constructor(transit) {
@@ -13,45 +10,43 @@ export default class Mesh {
 
     this.controller = new MeshController(this);
 
-    this.ingress = new MeshIngress(Service.create({ name: 'ingress' }));
+    this.proxy = new ServiceProxy(this);
+  }
 
-    this.egress = new MeshEgress(Service.create({ name: 'egress' }));
+  get ingress() {
+    return this.proxy.ingress;
+  }
 
-    this.serviceProxy = new RemoteServiceProxy(this.egress);
+  get egress() {
+    return this.proxy.egress;
   }
 
   connect(opts = {}) {
-    const dataPlane = opts.dataTransport.transporter(connect => {
-      connect.connectors[2].ingress.use(this.ingress.getHandler());
-    });
-
-    this.egress.egressService.plugin(dataPlane.createPlugin({ nodeId: this.meshId }));
-
     this.controller.discovery.on('service:up', (nodeId, { ns, actions }) => {
       const serviceDescriptor = new ServiceDescriptor(ns, actions);
-      this.serviceProxy.addRemoteService(nodeId, serviceDescriptor);
+      this.proxy.addRemoteService(nodeId, serviceDescriptor);
     });
 
     this.controller.discovery.on('service:down', nodeId => {
-      this.serviceProxy.removeRemoteService(nodeId);
+      this.proxy.removeRemoteService(nodeId);
     });
 
     this.transit.transporter.once('connected', () => {
-      this.controller.discovery.publishService(this.transit.service);
+      this.controller.publishService(this.transit.service);
     });
 
-    const ingressService = this.ingress.getService();
-    const egressService = this.egress.getService();
+    const ingressService = this.proxy.ingress.getService();
+    const egressService = this.proxy.egress.getService();
 
     const client = new Mesh.Client(ingressService, egressService);
 
-    const connect = async () => {
-      await dataPlane.connect(opts);
+    const connectAsync = async () => {
+      await this.proxy.connect(opts);
       await this.controller.connect(opts);
       client.emit('connected');
     };
 
-    connect();
+    connectAsync();
 
     return client;
   }

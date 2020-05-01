@@ -7,8 +7,11 @@ import Packet from './packet';
 export default class MeshController {
   constructor(mesh) {
     this.mesh = mesh;
-    this.discovery = new ServiceDiscovery(this, this.mesh);
+
     this.service = Service.create({ name: 'control' });
+
+    this.discovery = new ServiceDiscovery(this.mesh);
+
     this.transport = Transport.createLayer()
       .use(
         'gossip',
@@ -22,6 +25,16 @@ export default class MeshController {
 
   getService() {
     return this.service;
+  }
+
+  publishService(service) {
+    const ns = service.name;
+    const actions = service.namespace.registry.getPatterns();
+    this.service.call({ ns, actions }, null, { type: ServiceDiscovery.SERVICE_UP });
+  }
+
+  unpublishService(service) {
+    this.service.call(service.name, null, { type: ServiceDiscovery.SERVICE_DOWN });
   }
 
   connect(opts = {}) {

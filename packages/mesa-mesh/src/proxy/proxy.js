@@ -1,6 +1,15 @@
-export default class RemoteServiceProxy {
-  constructor(egress) {
-    this.egress = egress;
+import { Service } from '@mesa/core';
+import MeshIngress from './ingress';
+import MeshEgress from './egress';
+
+export default class ServiceProxy {
+  constructor(mesh) {
+    this.mesh = mesh;
+
+    this.ingress = new MeshIngress(Service.create({ name: 'ingress' }));
+
+    this.egress = new MeshEgress(Service.create({ name: 'egress' }));
+
     this.registry = {};
   }
 
@@ -25,15 +34,18 @@ export default class RemoteServiceProxy {
     });
   }
 
-  removeRemoteService(ns) {
-    this.egress.broker.namespace.unregister(ns);
-  }
-
-  // TODO: remove by nodeId instead?
-  _removeRemoteService(nodeId) {
+  removeRemoteService(nodeId) {
     const service = this.registry[nodeId];
     this.egress.broker.removeService(service);
-    // how do we handle broker.service.call caching the composed handler?
-    // actually namespace should handle it fine except the memoized matching
+  }
+
+  connect(opts) {
+    const dataPlane = opts.dataTransport.transporter(connect => {
+      connect.connectors[2].ingress.use(this.ingress.getHandler());
+    });
+
+    this.egress.egressService.plugin(dataPlane.createPlugin({ nodeId: this.mesh.meshId }));
+
+    return dataPlane.connect();
   }
 }

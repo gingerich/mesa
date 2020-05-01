@@ -1,21 +1,13 @@
 import EventEmitter from 'eventemitter3';
 import Packet from './packet';
 
+const SERVICE_UP = 'up';
+const SERVICE_DOWN = 'down';
+
 export default class ServiceDiscovery {
-  constructor(controller, mesh) {
-    this.controller = controller;
+  constructor(mesh) {
     this.mesh = mesh;
     this.emitter = new EventEmitter();
-  }
-
-  publishService(service) {
-    const ns = service.name;
-    const actions = service.namespace.registry.getPatterns();
-    this.controller.service.call({ ns, actions }, null, { cmd: 'up' });
-  }
-
-  unpublishService(service) {
-    this.controller.service.call(service.name, null, { cmd: 'down' });
   }
 
   on(event, listener) {
@@ -26,10 +18,10 @@ export default class ServiceDiscovery {
   createTransportPlugin(opts = {}) {
     return connect => {
       connect.egress.use((ctx, next) => {
-        if ('up' === ctx.cmd) {
+        if (SERVICE_UP === ctx.type) {
           ctx.packet.type = Packet.PACKET_UP;
         }
-        if ('down' === ctx.cmd) {
+        if (SERVICE_DOWN === ctx.type) {
           ctx.packet.type = Packet.PACKET_DOWN;
         }
         return next(ctx);
@@ -58,3 +50,6 @@ export default class ServiceDiscovery {
     };
   }
 }
+
+ServiceDiscovery.SERVICE_UP = SERVICE_UP;
+ServiceDiscovery.SERVICE_DOWN = SERVICE_DOWN;
